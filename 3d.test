@@ -1,0 +1,44 @@
+
+source 3d.tcl
+source func.tcl
+
+#puts [3d::identity]
+#puts [3d::rotate x 1 d]
+#set A [3d::transforms [3d::scale .5 .5 .5] [3d::scale .25] [3d::identity] [3d::identity]]
+
+
+#set X { 1 5 9 2 6 10 3 7 11 4 8 12 }
+#set Y { 10 50 90 20 60 100 30 70 110 40 80 120 }
+#set Z { 380 980 1580 440 1160 1880 500 1340 2180 564 1528 2492 }
+
+#set A [3d::transforms $X $Y]
+
+#puts "+X [3d::rotate x  1 d]"
+#puts "-X [3d::rotate x -1 d]"
+#puts "+Y [3d::rotate y  1 d]"
+#puts "-Y [3d::rotate y -1 d]"
+#puts "+Z [3d::rotate z  1 d]"
+#puts "-Z [3d::rotate z -1 d]"
+
+#set p { 1 1 1 } 
+#puts [3d::transform [3d::identity] $p]
+#puts [3d::transform [3d::scale .5] $p]
+#puts [3d::transform [3d::translate 0 0 2] $p]
+
+
+#puts [3d::transform [3d::transforms [3d::translate 1 0 0]] { 1 0 0 }]
+
+#puts [map x [3d::transform [3d::transforms [3d::translate 1 0 0] [3d::rotate x  90 deg]] { 1 0 0 }] { format %.2f $x }]
+#puts [map x [3d::transform [3d::transforms [3d::translate 1 0 0] [3d::rotate y  90 deg]] { 1 0 0 }] { format %.2f $x }]
+#puts [map x [3d::transform [3d::transforms [3d::translate 1 0 0] [3d::rotate z  90 deg]] { 1 0 0 }] { format %.2f $x }]
+
+
+#puts {}
+puts [map x [3d::transforms [3d::rotate y  90 deg] [3d::translate 1 0 0]] { format %.2f $x }]
+puts [map x [3d::transforms [3d::translate 1 0 0] [3d::rotate y  90 deg]] { format %.2f $x }]
+
+#puts [3d::inverse [3d::transforms [3d::rotate x 90 deg] [3d::translate .5 1 2]]]
+
+
+
+
