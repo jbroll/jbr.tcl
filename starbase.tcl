@@ -978,23 +978,23 @@ if { $::tcl_version >= 8.5 } {
     }
 }
 
-proc iota { 0 n } {
-    set iota {}
-    for { set i $0 } { $i <= $n } { incr i } {
-	lappend iota $i
-    }
+#proc iota { 0 n } {
+#    set iota {}
+#    for { set i $0 } { $i <= $n } { incr i } {
+#	lappend iota $i
+#    }
+#
+#    return $iota
+#}
 
-    return $iota
-}
-
-proc map { list var body } {
-  upvar 1 $var value
-  set result {}
-  foreach value $list {
-    lappend result [uplevel 1 $body]
-  }
-  return $result
-}
+#proc map { list var body } {
+#  upvar 1 $var value
+#  set result {}
+#  foreach value $list {
+#    lappend result [uplevel 1 $body]
+#  }
+#  return $result
+#}
 
 #proc map { list var body } {
 	#set result {}
