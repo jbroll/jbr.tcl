@@ -1,4 +1,5 @@
 
+proc I { x   } { set x }
 proc K { x y } { set x }
 
 proc +   { x y } { expr $x + $y }
@@ -18,6 +19,23 @@ proc iota { fr { to {} } { in 1 } } {
 
     for { set res {} } { $fr <= $to+$in*0.5 } { set fr [expr $fr+$in] } {lappend res $fr } 
     set res
+}
+proc red { args } {
+    return [uplevel [subst {
+        set _[info frame] {}
+        foreach [lrange $args 0 end-1] { set     _[info frame] \[eval {[lindex $args end]}] }
+        set _[info frame]
+    }]]
+}
+
+proc enumerate { list } {
+    set i 0
+    foreach item $list {
+	lappend reply $i $item
+	incr i
+    }
+
+    set reply
 }
 
 proc jot { { nx - } { x0 - } { x1 - } { xi - } } {
