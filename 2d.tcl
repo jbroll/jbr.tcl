@@ -1,6 +1,6 @@
 # Taken from http://wiki.tcl.tk/1234
 #
-namespace eval 2d {
+namespace eval 2d { 
   proc identity {} {list 1 0 0 1 0 0}
   proc translate {dx dy} {list 1 0 0 1 $dx $dy}
   proc reflect-x {} {list 1 0 0 -1 0 0}
