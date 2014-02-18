@@ -1,10 +1,14 @@
 proc fitscard { name type value { comment {} } } {
 
-  switch [lindex $type 0] {
-   i {}
-   s {  set value "'$value'"				}
-   r {	set value [format %f.[lindex $type 1] $value]	}
-   l {  set value [expr $value ? "T" : "F"] 		}
+  if { [catch {
+      switch [lindex $type 0] {
+       i {}
+       s {  set value "'[format %[lindex $type 1]s $value]'" }
+       r {	set value [format %[expr { [llength $type] == 1 ? ".5" : ".[lindex $type 1]" }]f $value]	}
+       l {  set value [expr $value ? "T" : "F"] 		}
+      }
+  } reply] } {
+	puts "fitscard : $name : $type : $value : $reply"
   }
 
   binary format {A8A2A32A3A35} $name "= " $value " / " $comment
