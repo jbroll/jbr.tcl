@@ -22,27 +22,16 @@ proc oo::define::accessor args {
     #puts [x a]
 
 
-# Control method visibilit
+# Control method visibility
 # 
 proc oo::define::public { method name args body } {
-        set currentclass [lindex [info level 1] 1]
-
-	oo::define $currentclass [subst { method $name { $args } { $body }; export $name }]
+      uplevel 1 [list method $name $args $body]
+      uplevel 1 [list export $name]
 }
 proc oo::define::private { method name args body } {
-        set currentclass [lindex [info level 1] 1]
-
-	oo::define $currentclass [subst { method $name { $args } { $body }; unexport $name }]
+      uplevel 1 [list method $name $args $body]
+      uplevel 1 [list unexport $name]
 }
-
-#proc oo::define::public  { method name args body } {
-#        uplevel 1 [list method $name $args $body]
-#	uplevel 1 [list   export $name]
-#}
-#proc oo::define::private { method name args body } {
-#        uplevel 1 [list method $name $args $body]
-#	uplevel 1 [list unexport $name]
-#}
 
 	#oo::class create X {
 	#    public method XXX {} { puts XXX }
