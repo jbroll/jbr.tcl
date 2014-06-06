@@ -92,11 +92,7 @@ proc foldr {func res list} {
     set res
 }
 
-proc lremove { list value } {
-    set indx [lsearch $list $value]
-
-    lreplace $list $indx $indx
-}
+proc lremove { list item } { lsearch -all -inline -not -exact $list $item }
 
 proc shuffle list {		# http://wiki.tcl.tk/941 shuffle10a
     set len [llength $list]

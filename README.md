@@ -11,6 +11,7 @@ My code:
 	* fits.tcl	: A small Tcl FITS reader.
 	* func.tcl	: Handy functional procs for Tcl.
 	* iter.tcl	: A coroutine generator generator.
+	* layout	: A DSL for the construction of Tk interfaces.
 	* starbase.tcl	: Read/Write ASCII TSV tables.
 	* string.tcl	: Extensions to the Tcl string data type.
 	* tcloo.tcl	: Tcl OO helpers.
