@@ -39,11 +39,11 @@ widget creation conventions will work with layout.
 
 Standard abrevioation:
 
-  * @ text
-  * ! button
-  * = entry
-  * * radiobutton
-  * ~ checkbutton
+  * "@" - text
+  * "!" - button
+  * "=" - entry
+  * "*" - radiobutton
+  * "~" - checkbutton
 
 Abreviated Example:
 
