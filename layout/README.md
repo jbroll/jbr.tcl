@@ -73,7 +73,7 @@ Longer example:
 	@ Guide ! "Start" -command guide-start ! "Stop"       -command guide-stop @ ::status Status
 	&   @ View  ! "Boxes" -command view-boxes  ! "Full Image" -command view-full ! "All Images" -command view-all
 
-	# These radiobuttons all set the fiber and call "set-fiber"
+	# These radiobuttons all set the fiber variable and call "set-fiber"
 	#
 	&   . -radiobutton.variable fiber
 	. -radiobutton.command "set-fiber"
