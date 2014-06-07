@@ -1,5 +1,5 @@
 
-Layout is a DSL for Tcl/Tk user interface specification.
+**Layout is a DSL for Tcl/Tk user interface specification.**
 
 Tk is a very popular user interface toolkit.  When being used from Tcl its main
 drawback is that every Tk widget needs a name.  Most of the names will only be
@@ -22,14 +22,14 @@ single final argument that defines the content of the container.  The command
 consists of a list of widget and container commands and grid syntax marks.
 These are the standard grid pseudo options, plus "." and "&".
 
-Grid syntax:
+**Grid syntax:**
 
  * "-" - Streach the widget to the next cell
  * "x" - Empty cell
  * "." - No op.  can be used to introduce global options.
  * "&" - Move to next row or column.
 
-Example:
+**Example:**
 
     proc hello {} { puts hello } 
 
@@ -40,7 +40,7 @@ Example:
 Abreviated names are provided for the most common widgets, but the any commands
 that follow the Tk widget creation conventions will work with layout.
 
-Standard abrevioation:
+**Standard abrevioation:**
 
   * "@" - text
   * "!" - button
@@ -48,7 +48,7 @@ Standard abrevioation:
   * "*" - radiobutton
   * "~" - checkbutton
 
-Abreviated Example:
+**Abreviated Example:**
 
     proc hello {} { puts hello } 
 
@@ -56,7 +56,7 @@ Abreviated Example:
 	! Hello
     }
 
-Longer example:
+**Longer example:
 
     layout in . {
 	# Global options
@@ -105,5 +105,7 @@ Longer example:
 		    & x @ "Full Image" = fullexp1 ! Set -command "setexp full 1" = fullexp2 ! Set -command "setexp full 2"
 		} - -
     }
+
+**Global Options:**
 
 
