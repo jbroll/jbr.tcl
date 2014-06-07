@@ -108,4 +108,29 @@ that follow the Tk widget creation conventions will work with layout.
 
 **Global Options:**
 
+**Layout API**
+
+Any Tk widget command may be used in a layout container with out additional
+specification.  When it is encountered in an expected widget command position
+it will be alled to create its interface element.  Additional widgets and
+containers may be added to the layout system using the layout API.  When 
+declaired commands will be able to have global and default options filled
+in and passed correctly and be able to participate as widget containers.
+
+**Declairation API**
+
+  * layout.debug
+  * layout.register
+  * layout.macro
+  * layout.option
+
+**Options API**
+
+  * layout.default.$option
+  * layout.$command.$option
+
+**Layout Container API**
+
+  * layout.$container.grid
+
 
