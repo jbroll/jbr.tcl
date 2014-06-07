@@ -6,7 +6,7 @@ Tcl files that I use every day.
   Tcl's detractors like to harsh on the Tcl mantra "every thing is a string".  I
   like consider a corollary of this : Code is data is code.  Tcl is not so
   much a programming language in the traditional sense. It is a set of
-  primitives to pass data and control execution scope.
+  primitives to pass data and control scope.
 
 
 My code:
