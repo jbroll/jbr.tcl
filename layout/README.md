@@ -109,6 +109,16 @@ that follow the Tk widget creation conventions will work with layout.
 
 **Global Options:**
 
+**Container Types:**
+
+  * layout - Top level container
+  * row - Alias for layout, used inside a layout to provide row oriented sub-frames
+  * col - Alias for "layout -type col", provides column oriented suub-frames.
+  * notebook - Container is a list of "page" containers.
+    * page -  Row oriented container used inside a notebook.
+  * paned - Container is a list of panes, vertically adjustable interface frames.
+    * pane - Row oriented container used inside a paned widget.
+
 **Layout API**
 
 Any Tk widget command may be used in a layout container with out additional
@@ -129,6 +139,8 @@ in and passed correctly and be able to participate as containers.
 
   * layout.default.$option
   * layout.$command.$option
+
+  * layout.options
 
 **Layout Container API**
 
