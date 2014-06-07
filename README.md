@@ -3,6 +3,12 @@ jbr.tcl
 
 Tcl files that I use every day.
 
+  Tcl's detractors like to harp on the Tcl mantra "every thing is a string".  I
+  like consider a corollary of this : Code is data is code.  Tcl is not so
+  much a programming language in the traditional sense. It is a set of
+  primitives to pass data and control execution scope.
+
+
 My code:
   * 3d.tcl	: 3d matrix transformations.
   * deadfish.tcl	: An implimentation of the deadfish language (maybe not everyday).
