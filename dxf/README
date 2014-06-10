@@ -1,0 +1,62 @@
+
+Some tcl script to play with DXF drawing exchange format.
+
+dxf.tcl : A simple namespace to crate DXF files.
+
+    dxf is a small namespace of commands that creates a DSL for the 
+    writing DXF drawing files.  It is relativly low level but simple
+    to use.
+
+    Example:
+
+	set dxfp [open sample.dxf w]
+
+	dxf::write $dxfp {
+	    dxf::code 999 "Mask to DXF"
+	    dxf::section HEADER {
+		dxf::code 9   \$ACADVER  1 AC1006
+		dxf::code 9   \$INSBASE  10    0.0		20    0.0	30 0.0
+		dxf::code 9   \$INSUNITS 70  4
+		dxf::code 9   \$EXTMIN   10  $::XMIN	20  $::YMAX
+		dxf::code 9   \$EXTMAX   10  $::XMAX	20  $::YMAX
+		dxf::code 9   \$LIMMIN   10  $::XMIN	20  $::YMAX
+		dxf::code 9   \$LIMMAX   10  $::XMAX	20  $::YMAX
+		dxf::code 9   \$CECOLOR  62 256
+	    }
+	    dxf::section TABLES {
+		dxf::table LTYPE	2 {
+		    dxf::ltype 0
+		}
+		dxf::table LAYER	5 {
+		    dxf::layer 0
+		    dxf::layer a_label   0 green
+		    dxf::layer b_holes   0 cyan  
+		    dxf::layer c_slits   0 red   
+		    dxf::layer d_outline 0 blue  
+		}
+	    }
+
+	    dxf::section ENTITIES {
+		dxf::set-ltype 0
+		dxf::set-layer c_slits
+
+		dxf::circ 10 10 10
+		dxf::rect 20 10 5 5
+	    }
+	}
+
+	close $dxfp
+
+
+cut.tcl : Apply CNC machine transformations, then call dxf::
+
+    The cut namespace has a couple configuration calls to establish
+    the desired transformations and shape creation calls that execute
+    the transformations and call parallel dxf:: routines to write 
+    the data to the file.
+
+dxf-parser.tcl : Very primitive parser for DXF ASCII format.
+dxf-viewer.rcl : Very primitive viewer for DXF ASCII format.
+
+	* Displays the DXF on a Tk canvas.
+

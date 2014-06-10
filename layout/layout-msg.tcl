@@ -3,7 +3,9 @@ proc layout.msg-setoption   { w option action data name indx op } {
     upvar $name value
 
     if { [catch { $w configure $option [$action $value $data] } reply] } {
-	puts $reply
+	if { ![string equal [lindex $reply 0] invalid] } {
+	    puts $reply
+	}
     }
 }
 
@@ -37,7 +39,7 @@ proc layout.msg-hash { value data } {
 }
 
 proc layout.msg-vformat { format name args } {
-    set $name% [format $format [set ::$name]]
+    catch { set $name% [format $format [set ::$name]] }
 }
 
 proc layout.options { comm item w options } {

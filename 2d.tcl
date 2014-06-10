@@ -6,7 +6,7 @@ namespace eval 2d {
   proc reflect-x {} {list 1 0 0 -1 0 0}
   proc reflect-y {} {list -1 0 0 1 0 0}
   proc shear {sx sy} {list 1 $sx $sy 1 0 0}
-  proc scale {sx sy} {list $sx 0 0 $sy 0 0}
+  proc scale {sx { sy - } } {if { $sy == "-" } { set sy $sx }; list $sx 0 0 $sy 0 0}
   set ::pi [expr {atan(1)*4}]
   proc rotate {angle {units radians}} {
      global pi
@@ -72,4 +72,17 @@ namespace eval 2d {
 
     list $a $b $c $d $e $f
   }
+
+  proc crack { transform } {
+    foreach {a b c d e f} $transform {break}
+    set sign_a [expr { $a >= 0 ? 1 : -1 }]
+    set sign_d [expr { $d >= 0 ? 1 : -1 }]
+
+    set sx [expr { $sign_a * sqrt($a*$a+$b*$b) }]
+    set sy [expr { $sign_d * sqrt($c*$c+$d*$d) }]
+    set  r [expr { atan2(-($b), $a) }]
+
+    return [list $sx $sy $r $e $f]
+  }
+
 }

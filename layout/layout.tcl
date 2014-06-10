@@ -247,6 +247,7 @@ proc layout { w args } {
 
     set row 0
     set col 0
+    set hint {}
 
     while { [llength $spec] } {
 	# Look ahead for special notation
@@ -274,10 +275,12 @@ proc layout { w args } {
 		lappend llsticky $lsticky;  set lsticky {}
 
 		incr row
+		set col 0
 
 		continue
 	    }
 	    ^ - x - -	{
+		incr col [expr { $item eq "x" }]
 		lappend lchild  $item
 		lappend lsticky {}
 		continue
@@ -286,7 +289,7 @@ proc layout { w args } {
 	    -*	{ 	set defs($item) [shift spec]
 			continue
 		}
-	    ?? { set dbg1 1 }
+	    {\?\?} { set dbg1 1; continue }
 
 	    default {
 		set args {}
@@ -299,8 +302,9 @@ proc layout { w args } {
 
 
 		while { ![char $spec -] } {
+
 		    lappend  args [shift spec] [string map "%w $name" [shift spec]]
-		    catch { layout.option.[lindex $spec 0] } ; #reply ; puts $reply
+		    catch { layout.option.[lindex $spec 0] } ; #reply ; # puts $reply
 		}
 
 		set sticky [yank -sticky args $defs(-sticky)]
@@ -321,6 +325,13 @@ proc layout { w args } {
 
 		array set d $args
 
+		if { [info exists d(-hint)] } {
+		    set hint $d(-hint)
+		    unset d(-hint)
+		} else {
+		    set hint {}
+		}
+
 		set map {}
 		foreach { opt value } [array get d] {
 		    lappend map [regsub {^-} $opt %] $value
@@ -340,6 +351,11 @@ proc layout { w args } {
 		if { [catch { set child [uplevel [list {*}$comm $name {*}$posi {*}$args]] } reply] } {
 		    puts stderr "$comm $name $posi $args"
 		    error $reply
+		}
+
+	 	if { $hint != {} } {
+		    set ::Hints($child) $hint
+		    set hint {}
 		}
 
 		array unset d

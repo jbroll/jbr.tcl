@@ -8,6 +8,10 @@ proc optmenu { w args } {
     set args         [lrange $args 0 end]
     set list {}
 
+    if { $textvariable ne "" && $variable eq "" } {
+	set variable $textvariable
+    }
+
     set listvariable [string map [list %v $variable] $listvariable]
 
     if { $listvariable ne "" && [info exists ::$listvariable] } {
@@ -15,9 +19,6 @@ proc optmenu { w args } {
     } 
     if { $listvariable ne "" } {
 	trace variable ::$listvariable w "optmenu:setlist $w"
-    }
-    if { $textvariable ne "" && $variable eq "" } {
-	set variable $textvariable
     }
     if { $textvariable eq "" } {
 	set textvariable $variable
@@ -57,10 +58,11 @@ proc optmenu:list { w list { vals {} } } {
     set varName [set ::${w}(varName)]
 
     $w.menu del 0 end
+    set n 1
     foreach i $list v $vals {
 
-	if { $v eq {} } { set v $i }
-        $w.menu add radiobutton -label $i -value $v -variable $varName -indicatoron 1
+        $w.menu add radiobutton -label $i -value $v -variable $varName -indicatoron 1 
+	incr n
     }
     return $w.menu
 }
