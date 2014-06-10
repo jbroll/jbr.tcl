@@ -27,14 +27,14 @@ proc cat { file } {
 	return [K [read -nonewline [K [set fp [open $file]] [fconfigure $fp -encoding utf-8]]] [close $fp]]
     }
 }
-proc echo { string { redirector - } { file - }} {
+proc echo { string { redirector - } { file - } { mode {} } } {
     switch -- $redirector {
-	>       { set fp [open $file w]	}
-	>>      { set fp [open $file a]	}
+	>       { set fp [open $file w$mode]	}
+	>>      { set fp [open $file a$mode]	}
 	default { set fp stdout		}
     }
 
-    puts $fp $string
+    puts {*}[expr { $mode eq {} ? {} : "-nonewline" }] $fp $string
     if { [string compare $file -] } { close $fp }
 }
 proc file-lock { lock { timer 0 } } {
