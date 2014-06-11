@@ -84,5 +84,4 @@ namespace eval 2d {
 
     return [list $sx $sy $r $e $f]
   }
-
 }
