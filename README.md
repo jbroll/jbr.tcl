@@ -23,7 +23,7 @@ My code:
   * tcloo.tcl	: Tcl OO helpers.
   * template.tcl	: Template expansion helpers.
   * trace.tcl	: Tcl executon trace helper.
-  * unix.tcl	: UNIX commands as Tcl procs.
+  * [unix.tcl](https://github.com/jbroll/jbr.tcl/wiki/unix.tcl)	: UNIX commands as Tcl procs.
 
 
 Borrowed/Enhanced Code:
