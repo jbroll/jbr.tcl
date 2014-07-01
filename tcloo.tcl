@@ -106,6 +106,7 @@ proc ::oo::Helpers::classvar { args } {			# http://wiki.tcl.tk/21595 + mods
  }
  oo::define oo::class {
     mixin -append _linked
+    export varname
  }
 
  proc oo::define::linked { args } {
