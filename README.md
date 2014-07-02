@@ -28,7 +28,7 @@ My code:
 
 Borrowed/Enhanced Code:
 
-  * 2d.tcl	: 2d matrix transformations.
+  * [2d.tcl](https://github.com/jbroll/jbr.tcl/wiki/2d.tcl)	: 2d matrix transformations.
   * perm.tcl	: A permutations generator.
   * set.tcl	: Set opperations on Tcl lists.
   * vector.tcl	: Operations on lists as N-dimensional vectors.
