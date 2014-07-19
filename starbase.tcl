@@ -28,9 +28,7 @@ proc starbase_ncols   { D } 	        {
 }
 proc starbase_get     { D row col }     { upvar $D T; return $T($row,$col) }
 proc starbase_set     { D row col val } { upvar $D T; set T($row,$col) $val; 	}
-proc starbase_colname { D col  }        { upvar $D T; set row 0; 
-						return $T($row,$col)
-}
+
 proc starbase_colname { D col { new {} } }  {
     upvar $D T;
     set row 0;
@@ -393,7 +391,6 @@ proc starbase_gethdrtable { t table x } {
 
     set ::starbase_lines {}
 }
-
 
 proc starbase_read { args } {
     set list {}

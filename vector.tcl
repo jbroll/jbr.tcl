@@ -1,6 +1,6 @@
 # http://wiki.tcl.tk/14022
 
- proc  foreach op {+ - * / % ==} {proc $op {a b} "expr {\$a $op \$b}"}
+ foreach op {+ - * / % ==} {proc $op {a b} "expr {\$a $op \$b}"}
 
  proc vec {op a { b {} } } {
      if { $b eq {} } {
