@@ -172,7 +172,7 @@ proc starbase_colins { t name here { value {} } } {
     return $here
 }
 
-proc starbase_header { t fp } {
+proc starbase_header { t fp { gets gets } } {
 	upvar $t T
 	global starbase_line
 	set N 1
@@ -197,7 +197,7 @@ proc starbase_header { t fp } {
 	unset starbase_line
 	set N 2
     }
-    for { set n $N } { [set eof [gets $fp line]] != -1 } { incr n } {
+    for { set n $N } { [set eof [$gets $fp line]] != -1 } { incr n } {
 	set T(H_$n) $line
 	if { [regexp -- {^ *(-)+ *(\t *(-)+ *)*} $line] } break
 
@@ -230,7 +230,35 @@ proc starbase_header { t fp } {
     return $T(Header)
 }
 
-proc starbase_hdrget { t { name {} } } {
+proc starbase_name { t } {
+	upvar $t T
+
+    for { set n 1 } { $n < $T(HLines) } { incr n } {
+	if { $T(H_$n) ne {} } {
+	    return $T(H_$n)
+	}
+    }
+
+    return {}
+}
+
+proc K { x y } { set x }
+proc starbase_extract { t file name } {
+    set data [split [K [read -nonewline [set fp [open $file]]] [close $fp]] \f]
+
+    foreach table $data {
+	if { [lindex $table 0] eq $name } {
+	    upvar $t T
+	    set ::starbase_lines [split $table \n]
+	    starbase_readfp T lines starbase_nextline
+
+	    break
+	}
+    }
+}
+
+
+proc starbase_hdrget { t { name {} } { indx {} } } {
     upvar $t T
 
     if { [string equal $name {} ] } {
@@ -244,7 +272,11 @@ proc starbase_hdrget { t { name {} } } {
 	return $rlist
     }
 
-    return $T(H_$name)
+    if { [string equal $indx {} ] } {
+	return $T(H_$name)
+    } else {
+	return [lindex $T(H_$name) $indx]
+    }
 }
 
 proc starbase_hdrset { t name value } {
@@ -299,14 +331,14 @@ proc starbase_hdrput { t fp } {
     }
 }
 
-proc starbase_readfp { t fp } {
+proc starbase_readfp { t fp { gets gets } } {
 	upvar $t T
 
-    starbase_header T $fp
+    starbase_header T $fp $gets
 
     set NCols [starbase_ncols T]
 
-    for { set r 1 } { [gets $fp line] != -1 } { incr r } {
+    for { set r 1 } { [$gets $fp line] != -1 } { incr r } {
 	if { [string index $line 0] == "\f" } {
 	    global starbase_line
 	    set starbase_line [string range $line 1 end]
@@ -322,7 +354,46 @@ proc starbase_readfp { t fp } {
 	}
     }
     set T(Nrows) [expr $r-1]
+
+    return 1
 }
+
+proc starbase_nextline { lines lineName } {
+    upvar $lineName line
+
+    set lines [lassign $::starbase_lines line]
+    set reply [expr { [llength $::starbase_lines] ? [string length $line] : -1 }]
+
+    set ::starbase_lines $lines
+
+
+    return $reply
+}
+
+proc starbase_gethdrtable { t table x } {
+        upvar $t M
+        upvar $x X
+
+    set ::starbase_lines {}
+
+    set headline {}
+    set dashline {}
+
+    set state head
+
+    set HLines 0
+
+    foreach card [starbase_iota 1 $M(HLines)] {
+        if { [lindex $M(H_$card) 0] ne $table } { continue }
+
+        lappend ::starbase_lines [join [lrange $M(H_$card) 1 end] \t]
+    }
+
+    starbase_readfp X lines starbase_nextline
+
+    set ::starbase_lines {}
+}
+
 
 proc starbase_read { args } {
     set list {}
@@ -563,7 +634,8 @@ proc starbase_http { t url wait } {
     set T(state) 0
     set T(http) [http::geturl $url 				\
 		-handler [list starbase_httpreader $t $wait] 	\
-		-command [list starbase_cancel $t $wait]]
+		-command [list starbase_cancel $t $wait]	\
+		protocol 1.0]
 }
 
 proc starbase_httpkill { t } {
@@ -830,7 +902,7 @@ if { $::tcl_version >= 8.5 } {
 	}
 
 	if { ![string compare $cols *] } {
-	    set cols [iota 1 $T(Ncols)]
+	    set cols [starbase_iota 1 $T(Ncols)]
 	}
 
 	if { [llength $var] == 2 } {
@@ -952,7 +1024,7 @@ if { $::tcl_version >= 8.5 } {
 	}
 
 	if { ![string compare $cols *] } {
-	    set cols [iota 1 $T(Ncols)]
+	    set cols [starbase_iota 1 $T(Ncols)]
 	}
 
 	if { [llength $var] == 2 } {
@@ -978,29 +1050,14 @@ if { $::tcl_version >= 8.5 } {
     }
 }
 
-#proc iota { 0 n } {
-#    set iota {}
-#    for { set i $0 } { $i <= $n } { incr i } {
-#	lappend iota $i
-#    }
-#
-#    return $iota
-#}
+proc starbase_iota { 0 n } {
+    set iota {}
+    for { set i $0 } { $i <= $n } { incr i } {
+	lappend iota $i
+    }
 
-#proc map { list var body } {
-#  upvar 1 $var value
-#  set result {}
-#  foreach value $list {
-#    lappend result [uplevel 1 $body]
-#  }
-#  return $result
-#}
-
-#proc map { list var body } {
-	#set result {}
-	#foreach $var $list [subst { lappend result \[eval $body\] }]
-	#return $result
-#}
+    return $iota
+}
 
 
 proc starbase_update { t set args } {
@@ -1038,9 +1095,10 @@ proc starbase_update { t set args } {
 
     set rows
 }
+
 proc select { columns args } {
     set expr 1
-	set body {}
+    set body {}
     set use  {}
 
     foreach { clause value } $args {
@@ -1054,19 +1112,19 @@ proc select { columns args } {
 
     upvar $t T
 
-	foreach var $use { upvar $var $var }
+    foreach var $use { upvar $var $var }
 
     set rows {}
     set R {}
     starbase_foreachrow T -colvars {
 	eval $body
-	    if $expr {
-		foreach col $columns {
-		    lappend R [set $col]
-		}
-		lappend rows $R
-		    set R {}
+	if $expr {
+	    foreach col $columns {
+		lappend R [set $col]
 	    }
+	    lappend rows $R
+	    set R {}
+	}
     }
 
     set rows
@@ -1095,47 +1153,16 @@ proc starbase_select { t columns args } {
     set R {}
     starbase_foreachrow T -colvars {
 	eval $body
-	    if $expr {
-		foreach col $columns {
-		    lappend R [set $col]
-		}
-		lappend rows $R
-		    set R {}
+	if $expr {
+	    foreach col $columns {
+		lappend R [set $col]
 	    }
+	    lappend rows $R
+	    set R {}
+	}
     }
 
     set rows
-}
-
-proc starbase_transpose { t } {
-        upvar $t T
-
-        # copy data to old table, clear new table, keep header
-        array set oldT [array get T]
-
-        starbase_hdrcpy T oldT
-        starbase_init   T
-        starbase_hdrcpy oldT T
-
-        # grab first (old) column data as (new) column names
-        starbase_colapp T [starbase_colname oldT 1]
-        starbase_foreachrow oldT {
-                starbase_colapp T [starbase_get oldT $row 1]
-        }
-
-        starbase_coldel oldT 1
-
-        # run through old data, plug it into the new table
-        starbase_foreachcol oldT {
-
-                set newrow ""
-                starbase_foreachrow oldT {
-                        lappend newrow [starbase_get oldT $row $col]
-                }
-
-                starbase_rowapp T -1 \
-                        "[starbase_colname oldT $col] $newrow"
-        }
 }
 
 proc starbase_transpose { t } {
