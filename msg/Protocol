@@ -1,0 +1,63 @@
+
+ Basic MMTI Messaging Protocol Specification.
+
+ 1. Newline terminated variable length ASCII message packet. 
+
+ 2. Packet Format.
+
+	[#] command args\n
+
+
+    A. Optional Packet Number.
+
+	A missing or 0 message number indicates that no acknowledgement of
+	the message is expected.  Packet numbers for server packets are
+	even, numbers for client packets are odd.
+
+    B. Command and Args.
+
+	The message body is made up of any characters between the message
+	number and the terminator.  A command may not begin with a numeric
+	character or it may be mistaken for a message number.
+
+    C. Terminator.
+
+	A Newline character terminates the message.
+
+ 3. Message length.
+
+    The length of a message is not implicitly limited by the protocol.
+    Currently the Hectospec Messaging library limits messages to:
+
+	#define MsgBufferSize   512
+
+    This could be fixed by replacing ReadLine with SlurpLine and
+    does not limit the command dependent data part of the message.
+
+ 5. Commands.
+
+    No commands are specifically defined in the protocol.
+
+    The mmti library defines:
+
+	set	- set a value
+	get	- get a value
+
+	ack	- positive acknowledge and return value.
+	blk	- positive acknowledge and data block.
+	nak	- negative acknowledge and return error.
+
+	sub	- subscribe to a value
+	uns	- unsubscribe to a value
+
+	lst	- list available server commands
+
+ 4. Inter Packet Data
+
+    Commands may define inter packet data.  The sender and receiver of this
+    data must each agree to write/read exactly the same number of bytes or
+    define a logical EOF character.
+
+    There is no provision for protocol resyncronization if commands get
+    confused sending or receiving interpacket data.
+

@@ -1,0 +1,15 @@
+#!/bin/sh
+#
+	echo export MSERV=192.168.2.1:4444
+	echo ""
+
+for ten in 0 1 2 3 4 5 6 7    ; do
+for one in 0 1 2 3 4 5 6 7 8 9; do
+	
+	if [ $one = 0   -a $ten = 0 ] ; then continue; fi
+	if [ $one -gt 2 -a $ten = 7 ] ; then continue; fi
+
+	echo export megaamp$ten$one=239.137.12.1:444$ten$one
+	done
+	done
+

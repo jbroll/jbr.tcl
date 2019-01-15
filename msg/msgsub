@@ -1,0 +1,27 @@
+#!/data/mmti/bin/tclsh
+#
+
+source /data/mmti/tcl/msg.tcl
+
+proc printvar { var name indx op } {
+	upvar $var v
+	puts  "$var: $v"
+}
+
+if { [catch {
+	set server 	[lindex $argv 0]
+	set variable 	[lrange $argv 1 end]
+
+	msg_client $server
+
+	foreach var [lrange $argv 1 end] {
+	    puts [msg_subscribe $server $var $var "printvar $var" ]
+	}
+
+	vwait forever
+	exit 0
+} error] } {
+	puts $error
+	exit 1
+}
+

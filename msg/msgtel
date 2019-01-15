@@ -1,0 +1,8 @@
+#!/bin/sh
+#
+# bmcleod wrote this, nice job!
+
+HOSTNAME=`hostname`
+eval server=\$$1
+eval telnet `echo $server | sed -e 's/:/ /' -e "s/^\./$HOSTNAME/"`
+

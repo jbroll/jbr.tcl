@@ -1,0 +1,18 @@
+#!/usr/bin/env tclkit8.6
+#
+
+source /data/mmti/src/msg/msg.tcl
+
+if { [catch {
+	set server 	[lindex $argv 0]
+	set variable 	[lindex $argv 1]
+	set value 	[lrange $argv 2 end]
+
+	msg_client $server
+	puts [msg_set $server $variable $value]
+	exit 0
+} error] } {
+	puts $error
+	exit 1
+}
+

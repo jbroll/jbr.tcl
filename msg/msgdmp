@@ -1,0 +1,29 @@
+#!/data/mmti/bin/tclsh
+#
+
+source /data/mmti/src/msg/msg.tcl
+
+
+if { [catch {
+	set server 	[lindex $argv 0]
+	set variable 	[lrange $argv 1 end]
+
+    puts "[clock format [clock seconds]]"
+    puts "$server"
+    puts "val\tvar"
+    puts "---\t---"
+
+	msg_client $server
+        set l [msg_list $server 5000]
+        foreach line $l {
+	    if {[lindex $line 0] eq "published"} {
+		set var [lindex $line 1]
+		if { [catch {puts "$var\t[msg_get $server $var]"} error ]} {puts stderr $error}
+	    }
+        }
+	exit 0
+} error] } {
+	puts $error
+	exit 1
+}
+

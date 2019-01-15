@@ -1,0 +1,21 @@
+#!/usr/bin/env tclkit8.6
+#
+
+set timeout 3000
+
+catch { set timeout [expr $env(MSGTIMEOUT)*1000] }
+
+source /data/mmti/src/msg/msg.tcl
+
+if { [catch {
+	set server 	[lindex $argv 0]
+	set command 	[lrange $argv 1 end]
+
+	msg_client $server
+	puts [msg_cmd $server "$command" $timeout]
+	exit 0
+} error] } {
+	puts $error
+	exit 1
+}
+

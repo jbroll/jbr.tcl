@@ -1,0 +1,35 @@
+C-based message examples
+	1.  cserver
+	This is a C-based server that computes the length of the input vector.
+	It uses the environment variable RADIUS to find it's socket,	
+		e.g. setenv RADIUS <machine>:5000
+
+	2.  cclient
+	This is a C-based client for the task.
+
+TCL based message examples
+	3.  tclserver.tcl
+	This is an example of a TCL server - it posts a couple of values
+	It uses the msg logging facility to produce keith.log.
+	It uses the environment variable EXAMPLE to find it's socket,	
+		e.g. setenv EXAMPLE <machine>:4000
+	
+	4.  tclclient.tcl
+	This is an example of a TCL client for this task
+
+GENERIC CLIENT
+	5.  telnet
+	You can telnet to any of the servers
+		e.g. telnet <machine> 4000	
+		(Note this syntax isn't identical to the environment variable)
+		
+		# List the commands/variables that are published
+		1 lst
+		# Send out any of the commands
+		1 <cmd> <arg1> <arg2>
+		# Get a posted variable
+		1 get <variable>
+
+	6.  msgclient.tcl:
+	This is a generic TCL client that can be run with any server.
+		 

@@ -1,0 +1,20 @@
+#!/data/mmti/bin/tclsh
+#
+
+source /data/mmti/tcl/msg.tcl
+
+if { [catch {
+	set server 	[lindex $argv 0]
+	set variable 	[lrange $argv 1 end]
+
+	msg_client $server
+        msg_list $server l  5000
+        foreach line $l {
+	    puts $line
+        }
+	exit 0
+} error] } {
+	puts $error
+	exit 1
+}
+
