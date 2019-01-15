@@ -80,6 +80,56 @@ proc ::oo::Helpers::classvar { args } {			# http://wiki.tcl.tk/21595 + mods
     }
 }
 
+ oo::define oo::class {
+     export varname
+ }
+
+ oo::class create __classvar {
+    constructor { args } {
+	# Don't know if the class has a constructor, catch a bad call
+	#
+	catch { next {*}$args }
+
+	#puts "set class [lindex [info level -1] 1]"
+	#return
+
+	puts "object [self object] class [self class]"
+	set classvars [my varname __classvar]
+	puts "IN __classvar $classvars"
+
+	foreach var [set $classvars] {
+	    set myvar [my varname $var]
+	    puts "set clvar \[$class varname $var]"
+	    set clvar [$class varname $var]
+
+	    puts "upvar $clvar $myvar"
+	}
+    }
+ }
+ oo::class create _classvar {
+    variable __classvar
+
+    constructor { args } {
+	puts "[self object] set __classvar {}"
+	set __classvar {}
+
+	next {*}$args
+
+	puts "oo::define [self] {mixin -append __classvar }"
+	oo::define [self] { mixin -append __classvar }
+    }
+ }
+ oo::define oo::class {
+   mixin -append _classvar
+ }
+ proc oo::define::classvar { args } {
+    set class [lindex [info level -1] 1]
+    oo::define $class { self export varname }
+
+    puts "lappend [$class varname __classvar] {*}$args; # remember classvars"
+    lappend [$class varname __classvar] {*}$args; # remember classvars
+ }
+
  oo::class create __linked {
     constructor { args } {
 	# Don't know if the class has a constructor, catch a bad call
@@ -106,9 +156,7 @@ proc ::oo::Helpers::classvar { args } {			# http://wiki.tcl.tk/21595 + mods
  }
  oo::define oo::class {
     mixin -append _linked
-    export varname
  }
-
  proc oo::define::linked { args } {
     set class [lindex [info level -1] 1]
     oo::define $class { self export varname }
