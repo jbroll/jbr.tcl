@@ -11,3 +11,41 @@ proc ::tcl::string::chunk { data { size 70 } } {
 
 namespace ensemble configure string -map [dict merge [namespace ensemble configure string -map] {chunk ::tcl::string::chunk}] 
 
+#
+# Pure Tcl implementation of [string insert] command.
+proc ::tcl::string::insert {string index insertString} {
+    # Convert end-relative and TIP 176 indexes to simple integers.
+    if {[regexp -expanded {
+        ^(end(?![\t\n\v\f\r ])      # "end" is never followed by whitespace
+        |[\t\n\v\f\r ]*[+-]?\d+)    # m, with optional leading whitespace
+        (?:([+-])                   # op, omitted when index is "end"
+        ([+-]?\d+))?                # n, omitted when index is "end"
+        [\t\n\v\f\r ]*$             # optional whitespace (unless "end")
+    } $index _ m op n]} {
+        # Convert first index to an integer.
+        switch $m {
+            end     {set index [string length $string]}
+            default {scan $m %d index}
+        }
+
+        # Add or subtract second index, if provided.
+        switch $op {
+            + {set index [expr {$index + $n}]}
+            - {set index [expr {$index - $n}]}
+        }
+    } elseif {![string is integer -strict $index]} {
+        # Reject invalid indexes.
+        return -code error "bad index \"$index\": must be\
+                integer?\[+-\]integer? or end?\[+-\]integer?"
+    }
+
+    # Concatenate the pre-insert, insertion, and post-insert strings.
+    string cat [string range $string 0 [expr {$index - 1}]] $insertString\
+               [string range $string $index end]
+}
+
+# Bind [string insert] to [::tcl::string::insert].
+namespace ensemble configure string -map [dict replace\
+        [namespace ensemble configure string -map]\
+        insert ::tcl::string::insert]
+

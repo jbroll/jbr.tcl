@@ -12,19 +12,19 @@
  proc shim:next { name args } {
     set level -1
     try {
-	set name [regsub ^:: $name {}]
+        set name [regsub ^:: $name {}]
 
-	while { ![regexp "^${name}(_shimmed)*$" [set shim [regsub ^:: [lindex [info level $level] 0] {}]]] } { incr level -1 }
+        while { ![regexp "^${name}(_shimmed)*$" [set shim [regsub ^:: [lindex [info level $level] 0] {}]]] } { incr level -1 }
     } on error message {
         set level -1
-	catch {
-	    while { ![regexp "^${name}(_shimmed)*" [lindex [info level $level] 0]] } {
-		incr level -1
-	    }
-	}
-	set shim $name
+        catch {
+            while { ![regexp "^${name}(_shimmed)*" [lindex [info level $level] 0]] } {
+                incr level -1
+            }
+        }
+        set shim $name
     }
 
-    ${shim}_shimmed {*}$args
+    tailcall ${shim}_shimmed {*}$args
  }
 

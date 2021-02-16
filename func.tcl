@@ -80,6 +80,10 @@ proc pick {func list} {
     return $ret
 }
 
+proc fold {args} {
+    foldl {*}$args
+}
+
 proc foldl {func res list} {
     foreach item $list { set res [eval $func [list $res $item]] }
     set res
