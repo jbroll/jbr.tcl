@@ -30,6 +30,9 @@ namespace eval table {
         set bdy [map row [body $tbl] { lselect $row $indicies }]
         list $hdr {*}$bdy
     }
+    proc cols { tbl } { llength [lindex $tbl 0] }
+    proc rows { tbl } { llength $tbl }
+
     proc colnum { tbl colname } {
         set header [header $tbl]
         lsearch $header $colname
@@ -38,9 +41,15 @@ namespace eval table {
         return [list [lindex $tbl 0] [lindex $tbl $row+1]]
     }
     proc todict { tbl } {
+        if { [llength $tbl] != 2 } {
+            error "a table of more than one row cannot convert ta a dict"
+        }
         return [zip [lindex $tbl 0] [lindex $tbl 1]]
     }
     proc tolist { tbl } {
+        if { [llength $tbl] != 2 } {
+            error "a table of more than one row cannot convert ta a list"
+        }
         return [lindex $tbl 1]
     }
     proc cell { tbl row col } {
@@ -51,12 +60,6 @@ namespace eval table {
     }
     proc setcell { tbl row col value } {
         uplevel 1 "lset $tbl $row+1 $col [list $value]"
-    }
-    proc cols { tbl } {
-        llength [lindex $tbl 0]
-    }
-    proc rows { tbl } {
-        llength $tbl
     }
 
     proc justify { tbl } {

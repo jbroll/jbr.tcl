@@ -18,6 +18,3 @@ proc date-milli {} {
     return $clock
 }
 
-
-
-

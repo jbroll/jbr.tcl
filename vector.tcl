@@ -4,7 +4,7 @@
 
  proc vec {op a { b {} } } {
      if { $b eq {} } {
-	lmap i $a {$op $i}
+         lmap i $a {$op $i}
      } elseif {[llength $a] == 1 && [llength $b] == 1} {
          $op $a $b
      } elseif {[llength $a]==1} {
