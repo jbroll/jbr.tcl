@@ -69,14 +69,14 @@ proc ::oo::Helpers::classvar { args } {			# http://wiki.tcl.tk/21595 + mods
     oo::define $class self export varname
 
     foreach { var value } $args {
-	set myvar [uplevel 1 [list my varname $var]]
-	set clvar [$class varname $var]
+        set myvar [uplevel 1 [list my varname $var]]
+        set clvar [$class varname $var]
 
-	uplevel 1 [list upvar $clvar $myvar]
+        uplevel 1 [list upvar $clvar $myvar]
 
-	if { ![info exists $clvar] } {
-	    set $clvar $value
-	}
+        if { ![info exists $clvar] } {
+            set $clvar $value
+        }
     }
 }
 
@@ -93,16 +93,16 @@ proc ::oo::Helpers::classvar { args } {			# http://wiki.tcl.tk/21595 + mods
 	#puts "set class [lindex [info level -1] 1]"
 	#return
 
-	puts "object [self object] class [self class]"
+	#puts "object [self object] class [self class]"
 	set classvars [my varname __classvar]
-	puts "IN __classvar $classvars"
+	#puts "IN __classvar $classvars"
 
 	foreach var [set $classvars] {
 	    set myvar [my varname $var]
-	    puts "set clvar \[$class varname $var]"
+	    #puts "set clvar \[$class varname $var]"
 	    set clvar [$class varname $var]
 
-	    puts "upvar $clvar $myvar"
+	    #puts "upvar $clvar $myvar"
 	}
     }
  }
@@ -110,12 +110,12 @@ proc ::oo::Helpers::classvar { args } {			# http://wiki.tcl.tk/21595 + mods
     variable __classvar
 
     constructor { args } {
-	puts "[self object] set __classvar {}"
+	#puts "[self object] set __classvar {}"
 	set __classvar {}
 
 	next {*}$args
 
-	puts "oo::define [self] {mixin -append __classvar }"
+	#puts "oo::define [self] {mixin -append __classvar }"
 	oo::define [self] { mixin -append __classvar }
     }
  }
@@ -126,7 +126,7 @@ proc ::oo::Helpers::classvar { args } {			# http://wiki.tcl.tk/21595 + mods
     set class [lindex [info level -1] 1]
     oo::define $class { self export varname }
 
-    puts "lappend [$class varname __classvar] {*}$args; # remember classvars"
+    #puts "lappend [$class varname __classvar] {*}$args; # remember classvars"
     lappend [$class varname __classvar] {*}$args; # remember classvars
  }
 
