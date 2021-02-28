@@ -1,6 +1,8 @@
 
 namespace eval table {
     namespace export header body row col nth todict tolist colnum setcell getcell justify rows cols
+    namespace export foreachrow
+
     namespace ensemble create
 
     proc header { tbl } {
@@ -32,6 +34,18 @@ namespace eval table {
     }
     proc cols { tbl } { llength [lindex $tbl 0] }
     proc rows { tbl } { llength $tbl }
+
+    proc foreachrow { tbl rowName { script {} } } {
+        if { $script eq "" } {
+            set script $rowName
+            set rowName row
+        }
+        upvar $rowName row
+
+        foreach row [table body $tbl] {
+            uplevel "lassign \$row [table header $tbl] ; " $script
+        }
+    }
 
     proc colnum { tbl colname } {
         set header [header $tbl]
