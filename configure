@@ -1,0 +1,66 @@
+#!/bin/sh
+#
+package=jbr
+
+prefix_default=$HOME/lib/tcl8/site-tcl
+
+version=1.0
+
+PACKAGES="
+    2d.tcl          fits.tcl        print.tcl       starbase.tcl    trace.tcl
+    3d.tcl          func.tcl        procargs.tcl    string.tcl      unix.tcl
+    date-milli.tcl  iter.tcl        recv.tcl        strtod.tcl      unsource.tcl
+    deadfish.tcl    list.tcl        set.tcl         table.tcl       vector.tcl
+    dict.tcl        perm.tcl        shim.tcl        tcloo.tcl       with.tcl
+    enum.tcl        pipe.tcl        stack.tcl       template.tcl    yield-while.tcl
+"
+
+OFS="$IFS"
+for arg in $* ;  do
+    case $arg in 
+    *prefix=*)	IFS="="	; set -- $arg; prefix=$2; IFS="$OFS";  shift	;;
+    install) ;;
+    uninstall) ;;
+    install-links) ;;
+    *)
+		echo "unknown option : $arg" 1>&2
+		exit
+    ;;
+    esac
+done
+
+case $1 in
+  uninstall)
+    . .config
+
+    rm -rf $prefix/jbr
+    ;;
+  install) 
+    . .config
+    rm -rf $prefix/jbr
+    mkdir -p $prefix/$package
+
+    for file in $PACKAGES ; do 
+        pkgn=$(basename $file .tcl)
+        cp $file $prefix/$package/$pkgn-$version.tm
+    done
+    ;;
+  install-links) 
+    . .config
+    rm -rf $prefix/jbr
+    mkdir -p $prefix/$package
+
+    for file in $PACKAGES ; do 
+        pkgn=$(basename $file .tcl)
+        ln -s `pwd`/$file $prefix/$package/$pkgn-$version.tm
+    done
+    ;;
+  *)
+    if [ "$prefix" = "" ] ; then
+        prefix=$prefix_default
+    fi
+
+    echo prefix=$prefix > .config
+    ;;
+esac
+

@@ -28,4 +28,6 @@ proc unsource { file } {
    }
 }
 
-unsource $argv
+if { [file tail [info script]] eq "unsource" } {
+    unsource $argv
+}
