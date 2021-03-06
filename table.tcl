@@ -1,7 +1,7 @@
 
 namespace eval table {
-    namespace export header body row col nth todict tolist colnum setcell getcell justify rows cols
-    namespace export foreachrow sort colapp compute
+    namespace export header body row col nth todict tolist colnum setcell getcell justify nrow ncol
+    namespace export foreachrow sort colapp compute rowdict
 
     namespace ensemble create
 
@@ -28,12 +28,12 @@ namespace eval table {
     proc col { tbl args } {
         set header [header $tbl]
         set indicies [map i $args { lsearch $header $i }]
-        set hdr [lselect $header $indicies]
-        set bdy [map row [body $tbl] { lselect $row $indicies }]
+        set hdr [lselect $header {*}$indicies]
+        set bdy [map row [body $tbl] { lselect $row {*}$indicies }]
         list $hdr {*}$bdy
     }
-    proc cols { tbl } { llength [lindex $tbl 0] }
-    proc rows { tbl } { llength $tbl }
+    proc ncol { tbl } { llength [lindex $tbl 0] }
+    proc nrow { tbl } { llength $tbl }
 
     proc sort { tbl cols args } {
         set header [header $tbl]
@@ -67,16 +67,27 @@ namespace eval table {
     }
 
     proc colnum { tbl colname } {
-        lsearch [header $tbl] $header $colname
+        lsearch [header $tbl] $colname
     }
     proc nth { tbl row } {
         return [list [lindex $tbl 0] [lindex $tbl $row+1]]
     }
-    proc todict { tbl } {
+    proc rowdict { tbl } {
         if { [llength $tbl] != 2 } {
             error "a table of more than one row cannot convert ta a dict"
         }
         return [zip [lindex $tbl 0] [lindex $tbl 1]]
+    }
+    proc todict { tbl } {
+        if { [table ncol $tbl] != 2 } {
+            error "a table of 2 columns is required to convert ta a dict : [table ncol $tbl]"
+        }
+        set dict {}
+        foreach row [table body $tbl] {
+            lassign $row 1 2
+            lappend dict $1 $2
+        }
+        return $dict
     }
     proc tolist { tbl } {
         if { [llength $tbl] != 2 } {
@@ -96,13 +107,13 @@ namespace eval table {
 
     proc justify { tbl } {
 
-        foreach i [iota [table cols $tbl]-1] { set $i 0 }
+        foreach i [iota [table ncol $tbl]-1] { set $i 0 }
         foreach row $tbl {
             foreach i [iota [llength $row]-1] col $row {
                 set $i [expr { max([set $i], [string length $col]) }]
             }
         }
-        set format [join [map i [iota [table cols $tbl]-1] { I "%[set $i]s" }] " "]
+        set format [join [map i [iota [table ncol $tbl]-1] { I "%[set $i]s" }] " "]
         
         join [map row $tbl { format $format {*}$row }] \n
     }

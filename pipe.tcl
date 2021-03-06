@@ -70,3 +70,4 @@ proc pipe {fns {var {}} {sep |~}} {
         set v $cmd
     }
 }
+package provide pipe 1.0
