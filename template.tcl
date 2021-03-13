@@ -37,11 +37,12 @@ proc template:switch { value cases } {
 }
 
 proc template:subst { string } {
-    uplevel [list subst [string map { \\ \\\\ [! [ "[: " "[: " [* [* [? [? [ \\[ } $string]]
+    string map { % $ } uplevel [list subst [string map { \\ \\\\ [! [ "[: " "[: " [* [* [? [? [ \\[ } $string]]
 }
 
 
 interp alias {} : {} template:foreach
 interp alias {} * {} template:switch
 interp alias {} ? {} template:if
+interp alias {} % {} template:subst
 
