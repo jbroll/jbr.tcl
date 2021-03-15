@@ -34,7 +34,8 @@ namespace ensemble configure dict -map [dict merge [namespace ensemble configure
 
 proc ::tcl::dict::import { dict args } {
     if { [llength $args] == 0 } {
-        set args [dict keys $dict]
+        upvar $dict D
+        ::set args [dict keys $D]
     }
 
     uplevel 1 [list dict update $dict {*}[zip $args $args] {}]
