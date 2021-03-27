@@ -9,7 +9,9 @@ version=1.0
 PACKAGES="
 	assert.tcl
     expression.tcl
+    ring.tcl
     term.tcl
+    test.tcl
     2d.tcl          fits.tcl        print.tcl       starbase.tcl    trace.tcl
     3d.tcl          func.tcl        procargs.tcl    string.tcl      unix.tcl
     date-milli.tcl  iter.tcl        recv.tcl        strtod.tcl      unsource.tcl

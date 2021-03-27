@@ -1,9 +1,11 @@
 
-proc assert-eq { a b msg } {
-    set va [uplevel $a]
-    set vb [uplevel $b]
-    if { $va ne $vb } {
-        error "failed assert $va != $vb : $a :: $b ::: $msg"
+proc assert-fail { reason } {
+    error $reason
+}
+
+proc assert-eq { va vb msg } {
+    if { $va != $vb } {
+        assert-fail "failed assert $va != $vb : $msg"
     }
 }
 
