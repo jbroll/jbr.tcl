@@ -7,6 +7,9 @@ interp alias {} eq {} assert-eq
 
 namespace eval test {
     set SKIP 10
+    set FAIL 11
+    set ASSERT_FAIL 14
+    set ::ASSERT_FAIL $FAIL
 
     proc skip { reason } {
         return -code $test::SKIP $reason
@@ -49,13 +52,14 @@ namespace eval test {
         set it [interp create]
         $it eval {
             package require jbr::test
+            namespace path ::test
         }
 
         foreach {phase code} $options {
             try {
-                $it eval namespace eval ::test [list $code]
-            } on error e {
-                print FAIL $name in $phase $e
+                $it eval $code
+            } on $test::FAIL {e options} {
+                print FAIL $name in $phase $e $options
                 return
             } on $test::SKIP e {
                 print SKIP $name in $phase $e

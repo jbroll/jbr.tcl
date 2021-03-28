@@ -42,7 +42,7 @@ proc ::tcl::dict::import { dict args } {
 }
 namespace ensemble configure dict -map [dict merge [namespace ensemble configure dict -map] {import ::tcl::dict::import}] 
 
-proc print {dict {pattern *}} {
+proc ::tcl::dict::print {dict {pattern *}} {
    set longest [tcl::mathfunc::max 0 {*}[lmap key [dict keys $dict $pattern] {string length $key}]]
    dict for {key value} [dict filter $dict key $pattern] {
       puts [format "%-${longest}s = %s" $key $value]
