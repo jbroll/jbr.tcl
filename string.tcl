@@ -11,6 +11,7 @@ proc ::tcl::string::chunk { data { size 70 } } {
 
 namespace ensemble configure string -map [dict merge [namespace ensemble configure string -map] {chunk ::tcl::string::chunk}] 
 
+# AMG https://wiki.tcl-lang.org/page/string+insert
 #
 # Pure Tcl implementation of [string insert] command.
 proc ::tcl::string::insert {string index insertString} {
