@@ -40,6 +40,10 @@ proc template:subst { string } {
     string map { %% % % $ } [uplevel [list subst [string map { \\ \\\\ [! [ "[: " "[: " [* [* [? [? [ \\[ } $string]]]
 }
 
+proc uncomment { string } {
+    regsub -all -line { *?;? *?#.*$} $string {}
+}
+
 
 interp alias {} : {} template:foreach
 interp alias {} * {} template:switch
