@@ -4,11 +4,12 @@ package require jbr::list
 package require jbr::print
 
 interp alias {} eq {} assert-eq
+interp alias {} true {} assert-true
+interp alias {} false {} assert-false
 
 namespace eval test {
     set SKIP 10
     set FAIL 11
-    set ASSERT_FAIL 14
     set ::ASSERT_FAIL $FAIL
 
     proc skip { reason } {
@@ -43,6 +44,7 @@ namespace eval test {
     }
 
     proc suite { name code } {
+        print $name
         namespace eval ::test $code
     }
 
@@ -59,16 +61,15 @@ namespace eval test {
             try {
                 $it eval $code
             } on $test::FAIL {e options} {
-                print FAIL $name in $phase $e $options
+                print " " FAIL $name in $phase $e $options
                 return
             } on $test::SKIP e {
-                print SKIP $name in $phase $e
-                return
+                print " " SKIP $name in $phase $e
             }
 
         }
         interp delete $it
 
-        print PASS $name
+        print " " PASS $name
     }
 }
