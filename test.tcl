@@ -27,7 +27,7 @@ namespace eval test {
         }
         set dup {}
         foreach option [lselect $args {*}[iota 0 [llength $args]/2 2]] {
-            if { ![regexp [join $options |]|{case-.*} $option] } {
+            if { ![regexp [join ^$options\$ |]|case-.* $option] } {
                 error "unknown option : $option expecting one of $options"
             }
             if { [dict exists $dup $option] } {
@@ -45,11 +45,15 @@ namespace eval test {
 
     proc suite { name code } {
         print $name
-        namespace eval ::test $code
+        try {
+            namespace eval ::test $code
+        } on $test::SKIP e {
+            print " " SKIP suite $name: $e
+        }
     }
 
     proc test { name body } {
-        set options [check-options { setup case cleanup } {*}$body]
+        set options [check-options { skip setup cleanup } {*}$body]
 
         set it [interp create]
         $it eval {
@@ -58,15 +62,18 @@ namespace eval test {
         }
 
         foreach {phase code} $options {
+            if { $phase eq "skip" && $code ne "" } {
+                print "  SKIP test $name: $code"
+                return
+            }
             try {
                 $it eval $code
             } on $test::FAIL {e options} {
                 print " " FAIL $name in $phase $e $options
                 return
             } on $test::SKIP e {
-                print " " SKIP $name in $phase $e
+                print " " SKIP case $name in $phase $e
             }
-
         }
         interp delete $it
 
