@@ -5,9 +5,18 @@ proc assert-fail { reason } {
     return -code $::ASSERT_FAIL $reason
 }
 
-proc assert-eq { va vb { msg "" } } {
-    if { [uplevel 1 $va] != $vb } {
-        assert-fail "failed assert $va != $vb : $msg"
+proc warn { args } {
+    try {
+        uplevel $args
+    } on $::ASSERT_FAIL e {
+        print "  WARN" $e
+    }
+}
+
+proc assert-eq { script vb { msg "" } } {
+    set va [uplevel 1 $script]
+    if { $va != $vb } {
+        assert-fail "failed assert $va != $vb : $script: $msg"
     }
 }
 
