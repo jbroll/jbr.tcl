@@ -18,6 +18,8 @@ PACKAGES="
     deadfish.tcl    list.tcl        set.tcl         table.tcl       vector.tcl
     dict.tcl        perm.tcl        shim.tcl        tcloo.tcl       with.tcl
     enum.tcl        pipe.tcl        stack.tcl       template.tcl    yield-while.tcl
+
+    layout/layout.tcl
 "
 
 OFS="$IFS"

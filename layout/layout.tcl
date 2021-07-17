@@ -74,8 +74,8 @@ array set Options {
 }
 
 
-layout.register     row	 	-container { -sticky -weight -background }	-proc { { w args } { layout $w -type row {*}[yink -subst args 0] -verb [yank -verb args 0] {*}$args } }
-layout.register     col	 	-container { -sticky -weight -background }	-proc { { w args } { layout $w -type col {*}[yink -subst args 0] -verb [yank -verb args 0] {*}$args } }
+layout.register     row	 	-container { -sticky -weight -background }	-proc { { w args } { layout $w -type row -verb [yank -verb args 0] {*}$args } }
+layout.register     col	 	-container { -sticky -weight -background }	-proc { { w args } { layout $w -type col -verb [yank -verb args 0] {*}$args } }
 
 layout.register     button	{ %core %pad -command }
 layout.register     text	{ %core %pad -anchor }
@@ -221,7 +221,6 @@ proc layout.row.grid { w llchild llsticky row col }  {
 proc layout { w args } {
     set type   [yank -type args row]
     set verb   [yank -verb args 0]
-    set subst  [yink -subst args]
 
     set lchild  {};  set llchild  {}
     set lsticky {};  set llsticky {}
@@ -241,9 +240,6 @@ proc layout { w args } {
     set dbg1 0
 
     set spec [regsub -all -line -- {((^[ \t]*)|([ \t]+))#.*$} $spec { }]	; # Remove comments
-    if { $subst } {
-	set spec [uplevel subst [list $spec]]
-    }
 
     set row 0
     set col 0
@@ -269,15 +265,15 @@ proc layout { w args } {
 
 	    . { continue }
 	    &    {
-		if { ![llength $lchild] } { continue }
+            if { ![llength $lchild] } { continue }
 
-		lappend llchild  $lchild;   set lchild  {}
-		lappend llsticky $lsticky;  set lsticky {}
+            lappend llchild  $lchild;   set lchild  {}
+            lappend llsticky $lsticky;  set lsticky {}
 
-		incr row
-		set col 0
+            incr row
+            set col 0
 
-		continue
+            continue
 	    }
 	    ^ - x - -	{
 		incr col [expr { $item eq "x" }]
