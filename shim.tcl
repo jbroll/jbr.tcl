@@ -5,8 +5,9 @@
  }
 
  proc shim { name args body } {
+    proc   ___tmp_$name $args $body
     shim:shift $name 
-    proc   $name $args $body
+    rename ___tmp_$name $name
  }
 
  proc shim:next { name args } {
