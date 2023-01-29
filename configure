@@ -2,12 +2,12 @@
 #
 package=jbr
 
-prefix_default=$HOME/lib/tcl8/site-tcl
+prefix=$HOME/lib/tcl8/site-tcl
 
 version=1.0
 
 PACKAGES="
-	assert.tcl
+	assert.tcl   log.tcl
     expression.tcl
     ring.tcl
     term.tcl
@@ -25,25 +25,28 @@ PACKAGES="
 OFS="$IFS"
 for arg in $* ;  do
     case $arg in 
-    *prefix=*)	IFS="="	; set -- $arg; prefix=$2; IFS="$OFS";  shift	;;
-    install) ;;
-    uninstall) ;;
-    install-links) ;;
-    *)
-		echo "unknown option : $arg" 1>&2
-		exit
-    ;;
+	*prefix=*)	IFS="="	; set -- $arg; prefix=$2; IFS="$OFS";  shift
+	    echo $arg > .config
+	    ;;
+	install) ;;
+	uninstall) ;;
+	install-links) ;;
+	*)
+		    echo "unknown option : $arg" 1>&2
+		    exit
+	;;
     esac
 done
 
+if [ -f ./.config ] ; then
+    . ./.config
+fi
+
 case $1 in
   uninstall)
-    . .config
-
     rm -rf $prefix/jbr
     ;;
   install) 
-    . .config
     rm -rf $prefix/jbr
     mkdir -p $prefix/$package
 
@@ -53,7 +56,6 @@ case $1 in
     done
     ;;
   install-links) 
-    . .config
     rm -rf $prefix/jbr
     mkdir -p $prefix/$package
 
