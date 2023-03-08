@@ -372,7 +372,12 @@ proc msg_setsock { server } {
 	error "host down : $server $host $port"
     }
     msg_debug DoneSock: $server $S(host) $S(port)
+
     set S(sock) $sock
+
+    if { $S(apikey) ne "" } {
+	msg_cmd $server "api $S(apikey)" 0 nowait
+    }
 
     fileevent $sock readable "msg_handle $server $sock"
     fconfigure $sock -buffering line
@@ -738,8 +743,28 @@ proc msg_rpy { sock msgid args } {
 	}
     }
 }
-proc msg_security { server peer } {
-	upvar #0 $server S
+proc msg_apikey { server key } {
+    upvar #0 $server S
+    set S(apikey) $key
+}
+
+proc msg_security { server peer sock } {
+    upvar #0 $server S
+
+    if { $S(apikey) ne "" } {
+	set key $S(apikey)
+
+	if { [read $sock 6] ne "0 api " } {
+	    msg_debug apikey expected
+	    return 0
+	}
+	if { [read $sock [string length $key]] ne $key } {
+	    msg_debug apikey no match
+	    return 0
+	}
+	msg_debug apikey OK
+    }
+
     msg_checkhost $peer $S(hosts.allow) $S(hosts.deny)
 }
 
@@ -806,7 +831,7 @@ proc msg_accept { server sock addr port } {
 
     msg_debug New Client from $peer
 
-    if { [msg_security $server $peer] == 1 } {
+    if { [msg_security $server $peer $sock] == 1 } {
 	fileevent $sock readable "msg_handle $server $sock"
 	fconfigure $sock -buffering line
 	set S($sock,tag) -
@@ -842,6 +867,7 @@ proc msg_init { server address type } {
     set S(reopen)  	 5000
     set S(hosts.allow) $host
     set S(hosts.deny)  { * }
+    set S(apikey)      {}
     set S(logfile)      NULL
     set S(logname)      NULL
     set S(N) 		$type

@@ -28,6 +28,9 @@ proc cat { file } {
     }
 }
 proc echo { string { redirector - } { file - } { mode {} } } {
+    if { $file eq "-" } {
+	set redirector -
+    }
     switch -- $redirector {
 	>       { set fp [open $file w$mode]	}
 	>>      { set fp [open $file a$mode]	}
