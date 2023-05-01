@@ -1,4 +1,4 @@
-#!/usr/bin/env tclkit8.6 
+#!/usr/bin/env tclsh
 #
 # unsource <file>
 #

@@ -211,6 +211,15 @@ proc msg_sock { server } {
 proc msg_getline { server sock } {
 	upvar #0 $server S
 
+    if { [eof $sock] } {
+	close $sock
+	return {}
+    }
+    if { [fblocked $sock] } {
+	close $sock
+	return {}
+    }
+
     set len 0
     set err [catch { set len [gets $sock line] }]
     if { $len < 0 || $err == 1 } {
@@ -322,13 +331,6 @@ proc msg_list { server { timeout {} } } {
     return $p
 }
 
-proc msg_alarmhandler { } {
-	global ALARM
-
-	upvar #0 $ALARM S
-	set S(reopen) 60000
-}
-
 proc msg_alarm { server secs } {
 	upvar #0 $server S
 	global ALARM
@@ -338,7 +340,7 @@ proc msg_alarm { server secs } {
 	#set S(sigalarm) [signal get ALRM]
 	#set ALARM $server
 
-	signal error ALRM ; #msg_alarmhandler
+	signal error ALRM ;
 	alarm $secs
     } else {
 	alarm 0
@@ -756,11 +758,11 @@ proc msg_security { server peer sock } {
 
 	if { [read $sock 6] ne "0 api " } {
 	    msg_debug apikey expected
-	    return 0
+	    return false
 	}
 	if { [read $sock [string length $key]] ne $key } {
 	    msg_debug apikey no match
-	    return 0
+	    return false
 	}
 	msg_debug apikey OK
     }
@@ -823,6 +825,8 @@ proc msg_matchone {hostname pattern} {
 proc msg_accept { server sock addr port } {
 	upvar #0 $server S
 
+    fconfigure $sock -buffering line -blocking no
+
     set peer [lindex [fconfigure $sock -peername] 1]
     set S($sock) $peer
     set S($sock,tag) -
@@ -833,7 +837,6 @@ proc msg_accept { server sock addr port } {
 
     if { [msg_security $server $peer $sock] == 1 } {
 	fileevent $sock readable "msg_handle $server $sock"
-	fconfigure $sock -buffering line
 	set S($sock,tag) -
 	msg_logmsg $server $sock "new"
     } else {
