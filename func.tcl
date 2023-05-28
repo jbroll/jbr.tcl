@@ -8,7 +8,6 @@ proc sum { lst } { foldl + 0 $lst }
 proc sqr { x   } { expr $x * $x }
 proc max { x y } { expr $x > $y ? $x : $y }
 
-
 proc iota { fr { to {} } { in 1 } } {
     if { $to eq {} } {
 	set to $fr
@@ -17,9 +16,23 @@ proc iota { fr { to {} } { in 1 } } {
     set fr [expr $fr]
     set to [expr $to]
 
-    for { set res {} } { $fr <= $to+$in*0.5 } { set fr [expr $fr+$in] } {lappend res $fr } 
+    for { set res {} } { $fr < $to } { set fr [expr $fr+$in] } {lappend res $fr } 
     set res
 }
+
+proc jot { { nx - } { x0 - } { x1 - } { xi - } } {
+    if { $nx eq "-" } { set nx 10 }
+    if { $x0 eq "-" } { set x0  0 }
+    if { $x1 eq "-" } { set x1 [expr { $x0+$nx }] }
+    if { $xi eq "-" } { set xi [expr { ($x1-$x0)/$nx }] }
+
+    if { $nx == 1 } {
+	expr { ($x0+$x1)/2.0 }
+    } else {
+	iota $x0 $x1 $xi
+    }
+}
+
 proc red { args } {
     return [uplevel [subst {
         set _[info frame] {}
@@ -38,29 +51,11 @@ proc enumerate { list } {
     set reply
 }
 
-proc jot { { nx - } { x0 - } { x1 - } { xi - } } {
-    if { $nx eq "-" } { set nx 10 }
-    if { $x0 eq "-" } { set x0  0 }
-    if { $x1 eq "-" } { set x1 [expr { $x0+$nx-1.0 }] }
-    if { $xi eq "-" } { set xi [expr { ($x1-$x0)/($nx-1.0) }] }
-
-    #puts "jot $nx $x0 $x1 $xi"
-
-    if { $nx == 1 } {
-	expr { ($x0+$x1)/2.0 }
-    } else {
-	#puts [iota $x0 $x1 $xi]
-	iota $x0 $x1 $xi
-    }
-}
-
 proc zip { args } {
     set n [iota 0 [expr [llength $args]-1]]
 
     join [map {*}[join [map a $n { list $a [lindex $args $a] }]] "list [join [map i $n { concat $$i }]]"]
 }
-
-
 
 proc map { args } {
     uplevel [subst {
