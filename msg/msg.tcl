@@ -754,17 +754,19 @@ proc msg_security { server peer sock } {
     upvar #0 $server S
 
     if { $S(apikey) ne "" } {
-	set key $S(apikey)
+        after 100
+        set key $S(apikey)
 
-	if { [read $sock 6] ne "0 api " } {
-	    msg_debug apikey expected
-	    return false
-	}
-	if { [read $sock [string length $key]] ne $key } {
-	    msg_debug apikey no match
-	    return false
-	}
-	msg_debug apikey OK
+        set 6 [read $sock 6]
+        if { $6 ne "0 api " } {
+            msg_debug apikey expected got $6
+            return false
+        }
+        if { [read $sock [string length $key]] ne $key } {
+            msg_debug apikey no match
+            return false
+        }
+        msg_debug apikey OK
     }
 
     msg_checkhost $peer $S(hosts.allow) $S(hosts.deny)
@@ -928,7 +930,7 @@ proc msg_isup { server } {
 }
 
 proc msg_unknown { command server sock msgid args } {
-	puts $args
+	puts "msg unknown $args"
 	msg_nak $sock $msgid "$server : unknown command : $msgid $command $args"
 }
 

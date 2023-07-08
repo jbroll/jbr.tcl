@@ -2,7 +2,7 @@
 proc ::tcl::dict::lappend2 {dict args} { 
     upvar 1 $dict d 
 
-    if { ![dict exists $d {*}[lrange $args 0 end-1]] } { 
+    if { ![::info exists d] || ![dict exists $d {*}[lrange $args 0 end-1]] } { 
         dict set d {*}[lrange $args 0 end-1] [list [lindex $args end]]
     } else {
         ::set list [dict get $d {*}[lrange $args 0 end-1]]
