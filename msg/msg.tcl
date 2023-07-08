@@ -59,17 +59,21 @@ proc msg_wait { server msgid { cmd {} } } {
 	upvar #0 $server S
 
     if { [lindex $S(id,$msgid) 0] == 0 } {
-	vwait ${server}(id,$msgid)
+        vwait ${server}(id,$msgid)
     }
 
     msg_debug Wait: $server $msgid continue
     catch { after cancel $S(to,$msgid) 
 	        msg_debug "Timeout Canceled: $S(to,$msgid)"
     }
-    catch { after cancel $S(reopen_timer) }
 
     set value $S(id,$msgid)
     set status [lindex [split $value " "] 0]
+
+    if { $S(up) && $status != -3 } {
+        msg_debug clear reopen timer
+        catch { after cancel $S(reopen_timer) }
+    }
 
     #set value [regexp -inline -all -- {\S+} $S(id,$msgid)]
 
@@ -77,7 +81,7 @@ proc msg_wait { server msgid { cmd {} } } {
     catch { unset S(to,$msgid) }
 
     if { $status == -1 } {
-	error $value
+        error $value
     }
     if { $status == -2 } {
         error "timeout $msgid $cmd"
@@ -89,7 +93,7 @@ proc msg_wait { server msgid { cmd {} } } {
         error "msg wait aborted $msgid $cmd"
     }
     if { $status ==  1 } {
-	return  [join [lrange [split $value " "] 1 end]]
+        return  [join [lrange [split $value " "] 1 end]]
     } 
 }
 
@@ -129,9 +133,9 @@ proc msg_reopen { server } {
     catch { after cancel $S(reopen_timer) }
 
     if { [catch {
-	set sock [msg_setsock $server]
+        set sock [msg_setsock $server]
         set S($sock) [lindex [fconfigure $sock -peername] 1]
-	set S($sock,tag) -
+        set S($sock,tag) -
     }] } {
         catch { after cancel $S(reopen_timer) }
         set S(reopen_timer) [after $S(reopen) "msg_reopen $server"]
@@ -146,7 +150,7 @@ proc msg_cmd { server cmd { timeout {} } { sync sync } { code {} } } {
         set msgid $S(N)
         incr S(N) 2
     } else {
-	set msgid 0
+        set msgid 0
     }
 
     set sock $S(sock)
@@ -168,7 +172,7 @@ proc msg_cmd { server cmd { timeout {} } { sync sync } { code {} } } {
 	    }
 	}
     }] } {
-	msg_kilclient $server $sock
+        msg_kilclient $server $sock
         set S(reopen_timer) [after $S(reopen) "msg_reopen $server"]
 	error "server down: $server $S(host) $S(port)"
     }
@@ -225,12 +229,12 @@ proc msg_getline { server sock } {
     if { $len < 0 || $err == 1 } {
 	if { $S(type) == 1 } {
 	    msg_debug Kil Server $server EOL From server
-            msg_kilclient  $server $sock 
+        msg_kilclient  $server $sock 
 	}
 	if { $S(type) == 2 } { 
 	    msg_debug Kil Client $S(sock) cannot read line from client
-            msg_kilclient  $server $sock
-        }
+        msg_kilclient  $server $sock
+    }
 
 	close $sock
 	set S(sock) ""
@@ -241,13 +245,13 @@ proc msg_getline { server sock } {
 	    if { [catch { uplevel #0 $S(done) }] == 1 } {
 		    global errorInfo
 
-		tk_messageBox -icon error -type ok  \
-		      -message "Error executing client done code: $errorInfo"
+            tk_messageBox -icon error -type ok  \
+                  -message "Error executing client done code: $errorInfo"
 	    }
 
 	    catch { after cancel $S(reopen_timer) }
+        msg_debug set reopen timer
 	    set S(reopen_timer) [after $S(reopen) "msg_reopen $server"]
-
 	}
 	return {}
     }
@@ -377,8 +381,8 @@ proc msg_setsock { server } {
 
     set S(sock) $sock
 
-    if { $S(apikey) ne "" } {
-	msg_cmd $server "api $S(apikey)" 0 nowait
+    if { $S(__apikey) ne "" } {
+        msg_cmd $server "api $S(__apikey)" 0 nowait
     }
 
     fileevent $sock readable "msg_handle $server $sock"
@@ -747,15 +751,15 @@ proc msg_rpy { sock msgid args } {
 }
 proc msg_apikey { server key } {
     upvar #0 $server S
-    set S(apikey) $key
+    set S(__apikey) $key
 }
 
 proc msg_security { server peer sock } {
     upvar #0 $server S
 
-    if { $S(apikey) ne "" } {
+    if { $S(__apikey) ne "" } {
         after 100
-        set key $S(apikey)
+        set key $S(__apikey)
 
         set 6 [read $sock 6]
         if { $6 ne "0 api " } {
@@ -838,13 +842,13 @@ proc msg_accept { server sock addr port } {
     msg_debug New Client from $peer
 
     if { [msg_security $server $peer $sock] == 1 } {
-	fileevent $sock readable "msg_handle $server $sock"
-	set S($sock,tag) -
-	msg_logmsg $server $sock "new"
+        fileevent $sock readable "msg_handle $server $sock"
+        set S($sock,tag) -
+        msg_logmsg $server $sock "new"
     } else {
-	msg_debug Kil Client no permission for $peer
-	msg_logmsg $server $sock "nak" "permission denied"
-	close $sock
+        msg_debug Kil Client no permission for $peer
+        msg_logmsg $server $sock "nak" "permission denied"
+        close $sock
     }
 }
 
@@ -872,7 +876,7 @@ proc msg_init { server address type } {
     set S(reopen)  	 5000
     set S(hosts.allow) $host
     set S(hosts.deny)  { * }
-    set S(apikey)      {}
+    set S(__apikey)      {}
     set S(logfile)      NULL
     set S(logname)      NULL
     set S(N) 		$type
@@ -964,8 +968,8 @@ proc msg_client { server { init { } } { done { } } { address {} } } {
 	upvar #0 $server S
 
     if { [info exists ::$server] } {
-	puts stderr "Global variable $server exists : cannot open client connection"
-	return
+        puts stderr "Global variable $server exists : cannot open client connection"
+        return
     }
     msg_init $server $address 1
 
@@ -1261,23 +1265,23 @@ proc msg_kilclient { server sock } {
     msg_logmsg $server $sock "kil"
     foreach timer [array names S to,*] {
     	catch { after cancel $S($timer) }
-	unset S($timer)
+        unset S($timer)
     }
     foreach msgid [array names S {id,[0-9]*}] {
     	catch { set S($msgid) -3 }
     }
     if { [info exists S(+$sock)] } {
-	foreach name $S(+$sock) {
-	    set ix [lsearch -exact $S(+$name) $sock]
-	    set S(+$name) [lreplace $S(+$name) $ix $ix]
+        foreach name $S(+$sock) {
+            set ix [lsearch -exact $S(+$name) $sock]
+            set S(+$name) [lreplace $S(+$name) $ix $ix]
 
-	    catch { after cancel $S($name,$sock,after) }
+            catch { after cancel $S($name,$sock,after) }
 
-	    catch { array unset S($name,$sock,update) }
-	    catch { array unset S($name,$sock,lastup) }
-	    catch { array unset S($name,$sock,after)  }
-	}
-	catch { array unset S(+$sock) }
+            catch { array unset S($name,$sock,update) }
+            catch { array unset S($name,$sock,lastup) }
+            catch { array unset S($name,$sock,after)  }
+        }
+        catch { array unset S(+$sock) }
     }
 }
 
@@ -1288,10 +1292,10 @@ proc rx { exp str rep } {
 
 proc msg_srvproc { server name args body } {
     if { [llength $name] == 2 } {
-	set proc [lindex $name 1]
-	set name [lindex $name 0]
+        set proc [lindex $name 1]
+        set name [lindex $name 0]
     } else {
-	set proc $name
+        set proc $name
     }
 
     msg_register $server $name {} $server.$proc
