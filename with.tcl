@@ -1,6 +1,10 @@
 
-proc with { variable = resource { free {} } { block {} } } {
-    uplevel [list set $variable $resource]
+proc with { resource as variable { free {} } { block {} } } {
+    if { $as eq "as" } {
+        uplevel [list set $variable $resource]
+    } else {
+        uplevel [list set $resource $variable]
+    }
 
     if { $block eq {} } {
         set block $free
