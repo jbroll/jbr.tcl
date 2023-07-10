@@ -29,7 +29,7 @@ proc jot { { nx - } { x0 - } { x1 - } { xi - } } {
     if { $nx == 1 } {
 	expr { ($x0+$x1)/2.0 }
     } else {
-	iota $x0 $x1 $xi
+	iota $x0 $x1+1 $xi
     }
 }
 
@@ -52,9 +52,9 @@ proc enumerate { list } {
 }
 
 proc zip { args } {
-    set n [iota 0 [expr [llength $args]-1]]
+    set n [iota 0 [expr [llength $args]]]
 
-    join [map {*}[join [map a $n { list $a [lindex $args $a] }]] "list [join [map i $n { concat $$i }]]"]
+    join [lmap {*}[join [lmap a $n { list $a [lindex $args $a] }]] "list [join [lmap i $n { concat $$i }]]"]
 }
 
 proc map { args } {

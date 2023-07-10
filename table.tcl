@@ -107,13 +107,13 @@ namespace eval table {
 
     proc justify { tbl } {
 
-        foreach i [iota [table ncol $tbl]-1] { set $i 0 }
+        foreach i [iota [table ncol $tbl]] { set $i 0 }
         foreach row $tbl {
-            foreach i [iota [llength $row]-1] col $row {
+            foreach i [iota [llength $row]] col $row {
                 set $i [expr { max([set $i], [string length $col]) }]
             }
         }
-        set format [join [map i [iota [table ncol $tbl]-1] { I "%[set $i]s" }] " "]
+        set format [join [map i [iota [table ncol $tbl]] { I "%[set $i]s" }] " "]
         
         join [map row $tbl { format $format {*}$row }] \n
     }
