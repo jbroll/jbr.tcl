@@ -461,10 +461,14 @@ proc msg_setsock { server } {
 
     set S(up) 1
     set S(connection) Up
-    set S(reopen) 1000
 
     msg_debug Sock $server: DONE
     return $sock
+}
+
+proc msg_setreopen { server millis } {
+    upvar $server S
+    set S(reopen) $millis
 }
 
 proc ackdone { id server index op } {
