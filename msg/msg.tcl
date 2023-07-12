@@ -763,22 +763,30 @@ proc msg_apikey { server key } {
     set S(__apikey) $key
 }
 
+proc msg_getkey { server sock } {
+    upvar #0 $server S
+    return $S($S(sock),apikey)
+}
+
 proc msg_security { server peer sock } {
     upvar #0 $server S
 
     if { $S(__apikey) ne "" } {
         after 100
-        set key $S(__apikey)
+        set apikeys $S(__apikey)
 
         set 6 [read $sock 6]
         if { $6 ne "0 api " } {
             msg_debug apikey expected got $6
             return false
         }
-        if { [read $sock [string length $key]] ne $key } {
+        set apikey [read $sock [string length $apikeys]]
+
+        if { $apikey ni $apikeys } {
             msg_debug apikey no match
             return false
         }
+        set S($S(sock),apikey) $apikey
         msg_debug apikey OK
     }
 

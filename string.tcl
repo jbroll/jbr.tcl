@@ -1,4 +1,18 @@
 
+proc ::tcl::string::ends-with { str suffix } { 
+    set len [expr { [string length $suffix] -1 }]
+
+    return [string equal [string range $str end-$len end] $suffix]
+}
+namespace ensemble configure string -map [dict merge [namespace ensemble configure string -map] {ends-with ::tcl::string::ends-with}] 
+
+proc ::tcl::string::starts-with { str prefix } { 
+    set len [expr { [string length $prefix] -1 }]
+
+    return [string equal [string range $str 0 $len] $prefix]
+}
+namespace ensemble configure string -map [dict merge [namespace ensemble configure string -map] {starts-with ::tcl::string::starts-with}] 
+
 proc ::tcl::string::chunk { data { size 70 } } { 
     set len [expr { $size -1 }]
 
@@ -8,7 +22,6 @@ proc ::tcl::string::chunk { data { size 70 } } {
 
     set reply
 }
-
 namespace ensemble configure string -map [dict merge [namespace ensemble configure string -map] {chunk ::tcl::string::chunk}] 
 
 # AMG https://wiki.tcl-lang.org/page/string+insert
@@ -44,7 +57,6 @@ proc ::tcl::string::insert {string index insertString} {
     string cat [string range $string 0 [expr {$index - 1}]] $insertString\
                [string range $string $index end]
 }
-
 # Bind [string insert] to [::tcl::string::insert].
 namespace ensemble configure string -map [dict replace\
         [namespace ensemble configure string -map]\
