@@ -132,11 +132,12 @@ proc msg_reopen { server } {
     set S(up) 0
     catch { after cancel $S(reopen_timer) }
 
-    if { [catch {
+    try {
         set sock [msg_setsock $server]
         set S($sock) [lindex [fconfigure $sock -peername] 1]
         set S($sock,tag) -
-    }] } {
+    } on error e {
+        msg_debug ReOpen $e
         catch { after cancel $S(reopen_timer) }
         set S(reopen_timer) [after $S(reopen) "msg_reopen $server"]
     }
@@ -189,13 +190,13 @@ proc msg_cmd { server cmd { timeout {} } { sync sync } { code {} } } {
     set S(cb,$msgid) $code
     set S(sy,$msgid) $sync
 
-    if { ![string compare $sync sync] } {
-	msg_wait $server $msgid $cmd
-    } elseif { ![string compare $sync async] } {
-	return $msgid
+    if { [string equal $sync sync] } {
+        return [msg_wait $server $msgid $cmd]
+    } elseif { [string equal $sync async] } {
+        return $msgid
     } else {
-	lappend S($sync) $msgid
-	return $msgid
+        lappend S($sync) $msgid
+        return $msgid
     }
 }
 
@@ -438,7 +439,7 @@ proc msg_setsock { server } {
 		}
 	        if { [string compare $wait {}] } {
 		    if { [catch { msg_waitgroup $server subscribe } reply] } {
-			msg_debug "Error reconnecting subscriptions : $reply"
+                msg_debug "Error reconnecting subscriptions : $reply"
 		    }
 		}
 	    }
@@ -542,7 +543,11 @@ proc msg_subscribe { server name { var {} } { code {} } { update {} } { timeout 
 	}
 
 	if { [catch {
-	    if { $S(up) } { catch { msg_cmd $server "sub $name $update" $timeout $sync } }
+	    if { $S(up) } { 
+            catch { 
+                msg_cmd $server "sub $name $update" $timeout $sync
+            } 
+        }
 	}] } {
 	    error "Error requesting subscription for $server:$name"
 	}
@@ -1167,13 +1172,13 @@ proc msg_ssub { server sock msgid sub name { update 1 } } {
             upvar #0 $S($name) var
 
 	    if { [string compare $S($name) {}] == 0 } {
-		error "No variable $name"
-		return
+            error "No variable $name"
+            return
 	    } }] == 1 } {
-		error "No variable $name"
-	}
+            error "No variable $name"
+        }
 
-        lappend S(+$sock) $name
+    lappend S(+$sock) $name
 	lappend S(+$name) $sock
 
 	set S($name,$sock,update) [expr int($update * 1000)]

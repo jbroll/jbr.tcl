@@ -20,7 +20,9 @@ proc template:if { args } {
 proc template:foreach { args } {
     return [uplevel [subst {
         set _[info frame] {}
-        foreach [lrange $args 0 end-1] { append _[info frame] \[subst {[lindex $args end]}] }
+        foreach [lrange $args 0 end-1] { 
+            append _[info frame] \[subst {[lindex $args end]}] 
+        }
         set _[info frame]
     }]]
 }
