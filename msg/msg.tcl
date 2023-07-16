@@ -729,22 +729,22 @@ proc msg_cack { server sock msgid ack args } {
 proc msg_nak { sock msgid args } {
     msg_debug Nak: $sock $msgid $args
     if { $msgid != 0 } {
-	msg_puts $sock $msgid nak $args
+        msg_puts $sock $msgid nak $args
 
-	if { [info exists ::MsgClientMap($sock)] } {
-	    msg_logmsg $::MsgClientMap($sock) $sock "nak" $msgid ack $args
-	}
+        if { [info exists ::MsgClientMap($sock)] } {
+            msg_logmsg $::MsgClientMap($sock) $sock "nak" $msgid ack $args
+        }
     }
 }
 
 proc msg_ack { sock msgid args } {
     msg_debug Ack: $sock $msgid $args
     if { $msgid != 0 } {
-	msg_puts $sock $msgid ack [join $args]
+        msg_puts $sock $msgid ack [join $args]
 
-	if { [info exists ::MsgClientMap($sock)] } {
-	    msg_logmsg $::MsgClientMap($sock) $sock "ack" $msgid ack $args
-	}
+        if { [info exists ::MsgClientMap($sock)] } {
+            msg_logmsg $::MsgClientMap($sock) $sock "ack" $msgid ack $args
+        }
     }
 }
 
@@ -758,9 +758,9 @@ proc msg_rpy { sock msgid args } {
 	}
     }
 }
-proc msg_apikey { server key } {
+proc msg_apikey { server keys } {
     upvar #0 $server S
-    set S(__apikey) $key
+    set S(__apikey) $keys
 }
 
 proc msg_getkey { server sock } {
@@ -780,7 +780,7 @@ proc msg_security { server peer sock } {
             msg_debug apikey expected got $6
             return false
         }
-        set apikey [read $sock [string length $apikeys]]
+        set apikey [read $sock [string length [lindex $apikeys 0]]]
 
         if { $apikey ni $apikeys } {
             msg_debug apikey no match
