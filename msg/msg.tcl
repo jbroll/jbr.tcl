@@ -628,6 +628,11 @@ proc msg_stag { server sock msgid set args } {
     set S($sock,tag) $args
     msg_ack $sock $msgid
 }
+
+proc msg_setting { sock } {
+    set ::MsgSetting $sock
+}
+
 proc msg_sset { server sock msgid set args } {
 	set name  [lindex $args 0]
 	set value [lrange $args 1 end]
