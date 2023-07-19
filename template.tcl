@@ -9,7 +9,9 @@ proc template:if { args } {
 
     while { [llength $args] } {
         switch [shift args] {
+         : -
          else   { append cmd [subst   { else { return \[subst {[shift args]}] } }] }
+         ? -
          elseif { append cmd [subst   { elseif { [shift args] } { return \[subst {[shift args]}] } }] }
         }
     }
