@@ -770,7 +770,7 @@ proc msg_apikey { server keys } {
 
 proc msg_getkey { server sock } {
     upvar #0 $server S
-    return $S($S(sock),apikey)
+    return $S($sock,apikey)
 }
 
 proc msg_security { server peer sock } {
@@ -791,7 +791,7 @@ proc msg_security { server peer sock } {
             msg_debug apikey no match
             return false
         }
-        set S($S(sock),apikey) $apikey
+        set S($sock,apikey) $apikey
         msg_debug apikey OK
     }
 
