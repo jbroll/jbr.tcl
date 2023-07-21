@@ -6,10 +6,12 @@ package require jbr::func
 package require jbr::unix
 
 oo::class create template-environment {
-    variable macros {}
-    variable macroPaths {}
 
     constructor { args } {
+        variable macros {}
+        variable macroArgs {}
+        variable macroPaths {}
+
         my macros {*}$args
     }
 
