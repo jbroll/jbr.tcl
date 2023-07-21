@@ -13,52 +13,75 @@ oo::class create template-environment {
         my macros {*}$args
     }
 
+    # Create a macro <name>
+    #
+    #   macro name # value          - A macro <name> that evaluates to <value> with numeric substitution.
+    #   macro name <args ..> value  - A macro <name> that evaluates to <value> with named substitution. 
+    #
     method macro { name args } {
-        variable macroTypes
+        variable macroArgs
         variable macros 
 
         if { [llength $args] == 2 && [lindex $args 0] eq "#" } {
-            set type #
+            set declairedArgs #
         } else {
-            set type [list named {*}[lrange $args 0 end-1]]
+            set declairedArgs [lrange $args 0 end-1]
         }
 
-        dict set macroTypes $name $type
+        dict set macroArgs $name $declairedArgs
         dict set macros $name [lindex $args end]
     }
+
+    # Find macros in files along a list paths.
+    #
     method macros { args } {
         variable macroPaths
         set macroPaths $args
     }
-    method append { macro text } {
+
+    # Append the <text> to the macro named <name>
+    #
+    method append { name text } {
         variable macros 
-        dict append macros $macro $text
+        dict append macros $name $text
     }
 
+    # Include the macro <name> in the expansion.  This is typically abbreviated "[< name ... ]"
+    #
+    # Several forms are acceptable for macro arguments:
+    #
+    #   [< <name> # [<value> ...] ]     - Numberic argument substitution
+    #   [< <name> <value> ...]          - An argument list where names are provided in the declariation
+    #   [< <name> <name> <value> ...]   - An argument list where names are provided in a key value list.
+    #   [< <name> <dict> ]              - A single argument that is a valid dict.
+    #
     method include { name args } {
         variable macros
-        variable macroTypes
+        variable macroArgs
         variable macroPaths
 
-        set macroType [dict get@ $macroTypes $name dict]
+        set declairedArgs [dict get@ $macroArgs $name dict]
 
+        # It is necessary to allow control of numberic substitution here so the file based 
+        # macros can use it.
+        #
         if { [lindex $args 0] eq "#" } {
-            set args [lassign $args type]
+            set args [lassign $args declairedArgs]  ; # Force numeric args substitutions
         } else {
-            set type [dict get@ $macroTypes $name dict]
+            set names $declairedArgs                ; # Use the names if provided.
         }
 
-        if { $type eq "#" } {
-            set names [iota 1 [llength $args]+1]
-            set args [zip $names $args]
+        if { $declairedArgs eq "#" } {
+            set args [zip [iota 1 [llength $args]+1] $args]
         } else {
-            if { [llength $type] > 1 } {                                    # There are names, zip them with the values
+            if { [llength $declairedArgs] } {       ; # There are names, zip them with the values
+
                 # Support default args similar to proc
                 #
-                set defaults [join [lmap arg [lrange $type 1 end] { if { [llength $arg] <= 1 } { continue }; set arg }]]
-                set args [zip -stop-short [lmap arg [lrange $type 1 end] { lindex $arg 0 }] $args]
+                set defaults [join [lmap arg $declairedArgs { if { [llength $arg] <= 1 } { continue }; set arg }]]
+                set args [zip -stop-short [lmap arg $declairedArgs { lindex $arg 0 }] $args]
                 set args [dict merge $defaults $args]
-            } elseif { [llength $type] == 1 && [llength $args] == 1 } {     # There are no names and a single dict is passed
+            } elseif { [llength $declairedArgs] == 0 && [llength $args] == 1 } {   ; # There are no names and a single dict is passed
                 set args [lindex $args 0]
             }
             # The default case is that there are no names and $args is already key value list.
@@ -79,11 +102,11 @@ oo::class create template-environment {
         }
 
         dict with args {
-            my subst $text
+            template:subst $text
         }
     }
 
     method subst { text } {
-        uplevel [list template:subst [string map [list "\[< " "\[![self] include "] $text]]
+        template:subst [string map [list "\[< " "\[![self] include "] $text]
     }
 }
