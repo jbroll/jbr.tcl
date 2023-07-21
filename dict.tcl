@@ -49,3 +49,10 @@ proc ::tcl::dict::print {dict {pattern *}} {
    }
 }
 namespace ensemble configure dict -map [dict merge [namespace ensemble configure dict -map] {print ::tcl::dict::print}] 
+
+proc ::tcl::dict::subst {dict text} {
+    dict with $dict {
+        return subst $text
+    }
+}
+namespace ensemble configure dict -map [dict merge [namespace ensemble configure dict -map] {subst ::tcl::dict::subst}] 

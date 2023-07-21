@@ -7,6 +7,7 @@ proc *   { x y } { expr $x * $y }
 proc sum { lst } { foldl + 0 $lst }
 proc sqr { x   } { expr $x * $x }
 proc max { x y } { expr $x > $y ? $x : $y }
+proc min { x y } { expr $x < $y ? $x : $y }
 
 proc iota { fr { to {} } { in 1 } } {
     if { $to eq {} } {
@@ -52,6 +53,10 @@ proc enumerate { list } {
 }
 
 proc zip { args } {
+    if { [lindex $args 0] eq "-stop-short" } {
+        set min [fold min [llength [lindex $args 1]] [lmap arg [lrange $args 2 end] { llength $arg }]]
+        set args [lmap arg [lrange $args 1 end] { lrange $arg 0 $min-1 }]
+    }
     set n [iota 0 [expr [llength $args]]]
 
     join [lmap {*}[join [lmap a $n { list $a [lindex $args $a] }]] "list [join [lmap i $n { concat $$i }]]"]

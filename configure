@@ -18,7 +18,7 @@ PACKAGES="
     deadfish.tcl    list.tcl        set.tcl         table.tcl       vector.tcl
     dict.tcl        perm.tcl        shim.tcl        tcloo.tcl       with.tcl
     enum.tcl        pipe.tcl        stack.tcl       template.tcl    yield-while.tcl
-    filewatch.tcl   seconds.tcl
+    filewatch.tcl   seconds.tcl     template_macro.tcl
 
     layout/layout.tcl
     msg/msg.tcl
