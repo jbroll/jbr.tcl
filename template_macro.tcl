@@ -79,11 +79,11 @@ oo::class create template-environment {
         }
 
         dict with args {
-            template:subst $text
+            my subst $text
         }
     }
 
     method subst { text } {
-        template:subst [string map [list "\[< " "\[![self] include "] $text]
+        uplevel [list template:subst [string map [list "\[< " "\[![self] include "] $text]]
     }
 }
