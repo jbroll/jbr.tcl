@@ -62,7 +62,7 @@ oo::class create template-environment {
         variable macroArgs
         variable macroPaths
 
-        set declairedArgs [dict get@ $macroArgs $name dict]
+        set declairedArgs [dict get? $macroArgs $name]
 
         # It is necessary to allow control of numberic substitution here so the file based 
         # macros can use it.
