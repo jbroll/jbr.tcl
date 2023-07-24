@@ -165,26 +165,26 @@ proc msg_cmd { server cmd { timeout {} } { sync sync } { code {} } } {
             flush $sock
 	}] } {
 	    if { $S(up) } {
-		set sock [msg_setsock $server]
-		puts $sock $line
-		flush $sock
+            set sock [msg_setsock $server]
+            puts $sock $line
+            flush $sock
 	    } else {
-		return -3
+            return -3
 	    }
 	}
     }] } {
         msg_kilclient $server $sock
         set S(reopen_timer) [after $S(reopen) "msg_reopen $server"]
-	error "server down: $server $S(host) $S(port)"
+        error "server down: $server $S(host) $S(port)"
     }
 
     if { [string compare $timeout {}] == 0 } {
-	set timeout $S(timeout)
+        set timeout $S(timeout)
     }
 
     if { [string compare $sync nowait] } {
-	set S(id,$msgid) 0
-	set S(to,$msgid) [after $timeout "msg_timeout $server $msgid"]
+        set S(id,$msgid) 0
+        set S(to,$msgid) [after $timeout "msg_timeout $server $msgid"]
     }
 
     set S(cb,$msgid) $code
@@ -669,7 +669,7 @@ proc msg_cset { server sock msgid set args } {
 
 	if { [catch { set ::$S($name) $value }] } {
 		global errorInfo
-	        puts "Can't set $S($name) : $errorInfo"
+        puts "Can't set $S($name) : $errorInfo"
 	}
 
 	set S(setting) {}
@@ -710,7 +710,7 @@ proc msg_cack { server sock msgid ack args } {
     if { [info exists S(cb,$msgid)] && [string compare $S(cb,$msgid) {}] } {
 
         if { [catch { set S(id,$msgid) [eval $S(cb,$msgid) $server $sock $msgid $ack $args] } reply] } {
-	    puts $reply
+            puts $reply
             set S(id,$msgid) -1
         }
         if { ![string compare $S(sy,$msgid) async] } {
@@ -788,7 +788,7 @@ proc msg_security { server peer sock } {
         set apikey [read $sock [string length [lindex $apikeys 0]]]
 
         if { $apikey ni $apikeys } {
-            msg_debug apikey no match
+            puts "apikey no match : $apikey"
             return false
         }
         set S($sock,apikey) $apikey
@@ -1150,11 +1150,11 @@ proc msg_mapvar { server Map } {
 proc msg_log {server log} {
     upvar #0 $server S
     if { [string compare $log {} ] != 0 } {
-	if { [file exists $log] } {
-	    set S(logname) $log
-	    set S(logfile) [open $log a]
-	    fconfigure $S(logfile) -buffering line
-	}
+        if { [file exists $log] } {
+            set S(logname) $log
+            set S(logfile) [open $log a]
+            fconfigure $S(logfile) -buffering line
+        }
     }
 }
 
