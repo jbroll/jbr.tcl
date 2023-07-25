@@ -523,16 +523,16 @@ proc msg_uplevel { code args } {
 }
 
 proc msg_subscribe { server name { var {} } { code {} } { update {} } { timeout {} } { sync sync } } {
-	msg_debug CSub: $server $name
 	upvar #0 $server S
+	if { $var == {} } { set var $name }
 
     set subscription [list $name $var $code $update]
+	msg_debug CSub: $subscription
     if { $subscription in $S(+subs) } {
         msg_debug CSub: $server $name : duplicate
         return
     }
 
-	if { $var == {} } { set var $name }
 
 	if { ![info exists ::$var] } {
 	    set ::$var {}
