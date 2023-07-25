@@ -553,6 +553,10 @@ proc msg_subscribe { server name { var {} } { code {} } { update {} } { timeout 
 	}
 }
 
+proc msg_variables { server } {
+	upvar #0 $server S
+    return [lmap var [array names S P,*] { string range $var 2 end }]
+}
 proc msg_slst { server sock msgid lst } {
 	msg_debug SLst: $server $sock $msgid
 	upvar #0 $server S

@@ -20,10 +20,15 @@ proc template:if { args } {
 }
 
 proc template:foreach { args } {
+    set end [expr { 1 + !([llength $args] % 2) }]
+    set sep ""
+    if { $end == 2 } { set sep [lindex $args end-1] }
     return [uplevel [subst {
         set _[info frame] {}
-        foreach [lrange $args 0 end-1] { 
-            append _[info frame] \[subst {[lindex $args end]}] 
+        set sep ""
+        foreach [lrange $args 0 end-$end] { 
+            append _[info frame] \$sep \[subst {[lindex $args end]}]
+            set sep "$sep"
         }
         set _[info frame]
     }]]
