@@ -526,6 +526,12 @@ proc msg_subscribe { server name { var {} } { code {} } { update {} } { timeout 
 	msg_debug CSub: $server $name
 	upvar #0 $server S
 
+    set subscription [list $name $var $code $update]
+    if { $subscription in $S(+subs) } {
+        msg_debug CSub: $server $name : duplicate
+        return
+    }
+
 	if { $var == {} } { set var $name }
 
 	if { ![info exists ::$var] } {
@@ -537,7 +543,9 @@ proc msg_subscribe { server name { var {} } { code {} } { update {} } { timeout 
 	}
 
 	set S($name) $var
-	lappend S(+subs) [list $name $var $code $update]
+	lappend S(+subs) $subscription
+    set S(+subs) [lsort -unique $S(+subs)]
+
 	if { [string compare $code {}] != 0 } {
 	    trace variable ::$var w [list msg_uplevel $code]
 	}
