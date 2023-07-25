@@ -545,7 +545,7 @@ proc msg_subscribe { server name { var {} } { code {} } { update {} } { timeout 
 	if { [catch {
 	    if { $S(up) } { 
             catch { 
-                msg_cmd $server "sub $name $update" $timeout $sync
+                msg_cmd $server "sub $name $update" $timeout $sync "msg_cset"
             } 
         }
 	}] } {
@@ -1207,8 +1207,7 @@ proc msg_ssub { server sock msgid sub name { update 1 } } {
 			"msg_postafter $server $sock $name"]
 	}
 
-	msg_ack $sock $msgid $var
-	if { "$name" != "log" } { catch { msg_puts $sock 0 set $name $var } }
+	msg_ack $sock $msgid $name $var
 }
 
 proc msg_postafter { server sock name } {
