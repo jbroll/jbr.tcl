@@ -435,7 +435,7 @@ proc msg_setsock { server } {
 		set wait {}
 
 		foreach sub $S(+subs) {
-		    lappend wait [msg_cmd $server "sub [lindex $sub 0] [lindex $sub 3]" 30000 subscribe]
+		    lappend wait [msg_cmd $server "sub [lindex $sub 0] [lindex $sub 3]" 30000 subscribe [lindex $sub 2]]
 		}
 	        if { [string compare $wait {}] } {
 		    if { [catch { msg_waitgroup $server subscribe } reply] } {
@@ -532,7 +532,6 @@ proc msg_subscribe { server name { var {} } { code {} } { update {} } { timeout 
         msg_debug CSub: $server $name : duplicate
         return
     }
-
 
 	if { ![info exists ::$var] } {
 	    set ::$var {}
