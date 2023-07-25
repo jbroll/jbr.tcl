@@ -768,11 +768,11 @@ proc msg_ack { sock msgid args } {
 proc msg_rpy { sock msgid args } {
     msg_debug Rpy: $sock $msgid $args
     if { $msgid != 0 } {
-	msg_puts $sock $msgid $args
+        msg_puts $sock $msgid $args
 
-	if { [info exists ::MsgClientMap($sock)] } {
-	    msg_logmsg $::MsgClientMap($sock) $sock "rpy" $msgid ack $args
-	}
+        if { [info exists ::MsgClientMap($sock)] } {
+            msg_logmsg $::MsgClientMap($sock) $sock "rpy" $msgid ack $args
+        }
     }
 }
 proc msg_apikey { server keys } {
