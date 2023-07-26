@@ -366,17 +366,15 @@ proc msg_setsock { server } {
     set port $S(port)
 
     msg_debug DoSock: $server $S(host) $S(port) $S(reopen)
-    msg_alarm $server 2 
 
     catch { close $S(sock) }
     catch { msg_kilclient $server $S(sock) }
 
-
-    if { [catch { set sock [socket $host $port] }] } { 
+    try { set sock [socket $host $port] } on error e {
 	    global errorInfo
+        msg_debug msg_setsock $e
 
-	msg_alarm $server 0
-	error "host down : $server $host $port"
+        error "host down : $server $host $port"
     }
     msg_debug DoneSock: $server $S(host) $S(port)
 
@@ -389,78 +387,77 @@ proc msg_setsock { server } {
     fileevent $sock readable "msg_handle $server $sock"
     fconfigure $sock -buffering line
 
-    msg_alarm $server 0
-    set $S(up) 0
+    set $S(up) 1
 
-    if { [catch { uplevel #0 $S(init) }] == 0 } {
-	if { [catch {
-	    # Re-sync the variables in the message map
-	    #
-	    set up $S(up)
-
-	    set wait {}
-
-	    foreach m $S(+vars) { 
-		set var  [lindex $m 0]
-		set name [lindex $m 1]
-		set init [lindex $m 2]
-
-		global   $var
-		upvar #0 $var v
-
-		if { [string compare $init Server] == 0 \
-		 || ([string compare $init Up]     == 0 && $S(up) == 1) } {
-		    lappend wait [msg_get $server $name 30000 resync "msg_aset $var"]
-		}
-		if { [string compare $init Client] == 0 \
-		 || ([string compare $init Up]     == 0 && $S(up) == 0) } {
-		    lappend wait [msg_set $server $name $v 30000 resync]
-		}
-	    }
-	    if { [string compare $wait {}] } { msg_waitgroup $server resync }
-
-	    set #S(up) $up
-	}] != 0 } {
-		close $sock
-		puts "Error syncing mapped vars with $server"
-		error "Error syncing mapped vars with $server"
-	}
-
-	if { [catch {
-	    set wait {}
-
-	    # Re-establish the subscriptions
-	    #
-	    if { [string compare $S(+subs) {}] != 0 } {
-		set wait {}
-
-		foreach sub $S(+subs) {
-		    lappend wait [msg_cmd $server "sub [lindex $sub 0] [lindex $sub 3]" 30000 subscribe [lindex $sub 2]]
-		}
-	        if { [string compare $wait {}] } {
-		    if { [catch { msg_waitgroup $server subscribe } reply] } {
-                msg_debug "Error reconnecting subscriptions : $reply"
-		    }
-		}
-	    }
-	}] } {
+    try { uplevel #0 $S(init) } on error e {
+        set S(up) 0
 		close $sock
 
-		puts "Error re-establishing subscriptions with $server"
-		error "Error re-establishing subscriptions with $server"
-	    }
-    } else {
-		close $sock
+        msg_debug client init $e
 
 		puts "Error in client init code $::errorInfo"
 		error "Error in client init code $::errorInfo"
+    }
+
+    try { 
+        # Re-sync the variables in the message map
+        #
+        set wait {}
+        set S(up) 1
+        foreach m $S(+vars) { 
+            set var  [lindex $m 0]
+            set name [lindex $m 1]
+            set init [lindex $m 2]
+
+            global   $var
+            upvar #0 $var v
+
+            if { [string compare $init Server] == 0 \
+             || ([string compare $init Up]     == 0 && $S(up) == 1) } {
+                lappend wait [msg_get $server $name 30000 resync "msg_aset $var"]
+            }
+            if { [string compare $init Client] == 0 \
+             || ([string compare $init Up]     == 0 && $S(up) == 0) } {
+                lappend wait [msg_set $server $name $v 30000 resync]
+            }
+        }
+        if { [string compare $wait {}] } { msg_waitgroup $server resync }
+    } on error e {
+        set $S(up) 0
+        close $sock
+        puts $e
+        puts "Error syncing mapped vars with $server"
+        puts $::errorInfo
+        error "Error syncing mapped vars with $server"
+    }
+
+    try {
+        # Re-establish the subscriptions
+        #
+        if { [string compare $S(+subs) {}] != 0 } {
+            set wait {}
+
+            foreach sub $S(+subs) {
+                lappend wait [msg_cmd $server "sub [lindex $sub 0] [lindex $sub 3]" 30000 subscribe [lindex $sub 2]]
+            }
+            if { [string compare $wait {}] } {
+                try { msg_waitgroup $server subscribe } on error e {
+                    msg_debug "Error reconnecting subscriptions : $e"
+                } 
+            }
+        }
+    } on error e {
+        set S(up) 0
+        close $sock
+
+        puts "Error re-establishing subscriptions with $server"
+        error "Error re-establishing subscriptions with $server"
     }
 
     #catch { msg_tag        $server [file tail $::argv0] 3000 nowait } reply ;# puts $reply
 
     # try retry here maybe?
 
-    set S(up) 1
     set S(connection) Up
 
     msg_debug Sock $server: DONE
@@ -549,9 +546,11 @@ proc msg_subscribe { server name { var {} } { code {} } { update {} } { timeout 
 	    trace variable ::$var w [list msg_uplevel $code]
 	}
 
+    msg_debug Server Up $S(up)?
 	if { [catch {
 	    if { $S(up) } { 
             catch { 
+                msg_debug msg_cmd $server "sub $name $update" $timeout $sync "msg_cset"
                 msg_cmd $server "sub $name $update" $timeout $sync "msg_cset"
             } 
         }
@@ -937,7 +936,7 @@ proc msg_down { server } {
     catch { set clients $S(+$name) }
 
     foreach sock $clients {
-	close $sock
+        close $sock
     }
 }
 
