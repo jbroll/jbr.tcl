@@ -1042,8 +1042,8 @@ proc msg_publish { server name { var {} } { code {} } { comment {} } } {
     if { $var == {} } { set var $name }
 
     if { [info exists S($name)] } {
-	puts "msg warning $name already published from $var"
-	return
+        puts "msg warning $name already published from $var"
+        return
     }
 
     set S($name)       $var
@@ -1058,7 +1058,7 @@ proc msg_publish { server name { var {} } { code {} } { comment {} } } {
 	set ::$var {}
     }
     if { [string compare $code {}] != 0 } {
-	trace variable v rw $code
+        trace variable v rw $code
     }
     trace variable v w "msg_postvar $server $name"
 
@@ -1193,8 +1193,8 @@ proc msg_ssub { server sock msgid sub name { update 1 } } {
             error "No variable $name"
         }
 
-    lappend S(+$sock) $name
-	lappend S(+$name) $sock
+    lappend S(+$sock) $name ; set S(+$sock) [lsort -unique $S(+$sock)]
+	lappend S(+$name) $sock ; set S(+$name) [lsort -unique $S(+$name)]
 
 	set S($name,$sock,update) [expr int($update * 1000)]
 	set S($name,$sock,lastup) [clock clicks -milliseconds]
@@ -1235,7 +1235,7 @@ proc msg_post { server name { post 1 } } {
 	upvar #0 $server S
 	upvar #0 $S($name) var
 
-#	msg_debug Post: $name $var
+    msg_debug Post: $name $var
 
     set change [string compare $S($name,cache) $var]
     set clock  [clock clicks -milliseconds]
@@ -1243,38 +1243,38 @@ proc msg_post { server name { post 1 } } {
 
 
     foreach sock $S(+$name) {
-	if { ![string compare $sock $::MsgSetting] } {
-	    set S($name,$sock,lastup) $clock
-	    continue
-	}
-	#msg_debug Post: $sock $name $var
+        if { ![string compare $sock $::MsgSetting] } {
+            set S($name,$sock,lastup) $clock
+            continue
+        }
 
-	set update $S($name,$sock,update)
+        set update $S($name,$sock,update)
 
-	if { $update > 0				\
-	  && $change					\
-	  && ![string compare $S($name,$sock,after) {}] } {
+        msg_debug Not Skipped Post: $sock $name $var : Update $update Change $change After  $S($name,$sock,after)
+        if { $update > 0				\
+          && $change					\
+          && ![string compare $S($name,$sock,after) {}] } {
 
-	    set nextup [expr ($S($name,$sock,lastup)	\
-		            + $S($name,$sock,update)) - $clock]
+            set nextup [expr ($S($name,$sock,lastup)	\
+                        + $S($name,$sock,update)) - $clock]
 
-	    if { $nextup < 0 } { set nextup 0 }
+            if { $nextup < 0 } { set nextup 0 }
 
-	    set S($name,$sock,after) [after $nextup 	\
-			"msg_postafter $server $sock $name"]
-	    if { "$name" != "log" } {
-		msg_logmsg $server $sock set $name $var
-	    }
-	}
-	if { $post && $update == 0 } {
-	    catch {
-		msg_puts $sock 0 set $name $var
-		if { "$name" != "log" } {
-		    msg_logmsg $server $sock set $name $var
-		}
-	        set S($name,$sock,lastup) $clock
-	    }
-	}
+            set S($name,$sock,after) [after $nextup 	\
+                "msg_postafter $server $sock $name"]
+            if { "$name" != "log" } {
+            msg_logmsg $server $sock set $name $var
+            }
+        }
+        if { $post && $update == 0 } {
+            catch {
+                msg_puts $sock 0 set $name $var
+            if { "$name" != "log" } {
+                msg_logmsg $server $sock set $name $var
+            }
+                set S($name,$sock,lastup) $clock
+            }
+        }
     }
 }
 
