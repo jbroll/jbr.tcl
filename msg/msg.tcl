@@ -438,7 +438,8 @@ proc msg_setsock { server } {
             set wait {}
 
             foreach sub $S(+subs) {
-                lappend wait [msg_cmd $server "sub [lindex $sub 0] [lindex $sub 3]" 30000 subscribe [lindex $sub 2]]
+                msg_debug msg_cmd $server "sub [lindex $sub 0] [lindex $sub 3]" 30000 subscribe msg_cset
+                lappend wait [msg_cmd $server "sub [lindex $sub 0] [lindex $sub 3]" 30000 subscribe msg_cset]
             }
             if { [string compare $wait {}] } {
                 try { msg_waitgroup $server subscribe } on error e {
@@ -550,8 +551,8 @@ proc msg_subscribe { server name { var {} } { code {} } { update {} } { timeout 
 	if { [catch {
 	    if { $S(up) } { 
             catch { 
-                msg_debug msg_cmd $server "sub $name $update" $timeout $sync "msg_cset"
-                msg_cmd $server "sub $name $update" $timeout $sync "msg_cset"
+                msg_debug msg_cmd $server "sub $name $update" $timeout $sync msg_cset
+                msg_cmd $server "sub $name $update" $timeout $sync msg_cset
             } 
         }
 	}] } {
@@ -678,8 +679,7 @@ proc msg_cset { server sock msgid set args } {
 	set S(setting) $name
 
 	if { [catch { set ::$S($name) $value }] } {
-		global errorInfo
-        puts "Can't set $S($name) : $errorInfo"
+        puts "Can't set $S($name) : $::errorInfo"
 	}
 
 	set S(setting) {}
@@ -719,6 +719,7 @@ proc msg_cack { server sock msgid ack args } {
 
     if { [info exists S(cb,$msgid)] && [string compare $S(cb,$msgid) {}] } {
 
+        msg_debug msg_cack cb $S(cb,$msgid) $server $sock $msgid $ack $args
         if { [catch { set S(id,$msgid) [eval $S(cb,$msgid) $server $sock $msgid $ack $args] } reply] } {
             puts $reply
             set S(id,$msgid) -1
