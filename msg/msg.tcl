@@ -141,7 +141,6 @@ proc msg_reopen { server } {
         catch { after cancel $S(reopen_timer) }
         set S(reopen_timer) [after $S(reopen) "msg_reopen $server"]
     }
-
 }
 
 proc msg_cmd { server cmd { timeout {} } { sync sync } { code {} } } {
@@ -547,16 +546,12 @@ proc msg_subscribe { server name { var {} } { code {} } { update {} } { timeout 
 	    trace variable ::$var w [list msg_uplevel $code]
 	}
 
-    msg_debug Server Up $S(up)?
-	if { [catch {
-	    if { $S(up) } { 
-            catch { 
-                msg_debug msg_cmd $server "sub $name $update" $timeout $sync msg_cset
-                msg_cmd $server "sub $name $update" $timeout $sync msg_cset
-            } 
+    if { $S(up) } { 
+        try {
+            msg_cmd $server "sub $name $update" $timeout $sync msg_cset
+        } on error e {
+            error "Error requesting subscription for $server:$name : $e"
         }
-	}] } {
-	    error "Error requesting subscription for $server:$name"
 	}
 }
 
@@ -891,14 +886,14 @@ proc msg_init { server address type } {
 
 
     if { [string compare $address {}] == 0 } {
-	set name [string toupper $env($server)]
+        set name [string toupper $env($server)]
     } else {
-	set name $address
+        set name $address
     }
 
     set host [lindex [split $name : ] 0]
     if { [string compare $host "."] == 0 } {
-	set host [info hostname]
+        set host [info hostname]
     }
     set port [lindex [split $name : ] 1]
 
@@ -1018,7 +1013,7 @@ proc msg_client { server { init { } } { done { } } { address {} } } {
     interp alias $server blk {} msg_cack
     interp alias $server nak {} msg_cnak
 
-    msg_reopen $server
+    after idle [list msg_reopen $server]
 }
 
 # Server side access control
