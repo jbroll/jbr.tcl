@@ -11,12 +11,10 @@ set ::MsgSetting {}
 proc msg_clock {} { expr { [clock clicks -milliseconds]/1000.0 } }
 
 proc msg_debug { args } {
-	global env
-
     catch {
-	if { $env(MSGDEBUG) != 0 } {
- 	    puts stderr "[clock format [clock seconds]] $args"
-	}
+        if { $::env(MSGDEBUG) != 0 } {
+            puts stderr "[clock format [clock seconds]] $args"
+        }
     }
 }
 
@@ -126,7 +124,7 @@ proc msg_timeout { server msgid } {
 }
 
 proc msg_reopen { server } {
-	msg_debug Reopen: $server
+	msg_debug msg_reopen: $server
 	upvar #0 $server S
 
     set S(up) 0
@@ -136,10 +134,12 @@ proc msg_reopen { server } {
         set sock [msg_setsock $server]
         set S($sock) [lindex [fconfigure $sock -peername] 1]
         set S($sock,tag) -
+        return $sock
     } on error e {
-        msg_debug ReOpen $e
+        msg_debug msg_reopen $e
         catch { after cancel $S(reopen_timer) }
         set S(reopen_timer) [after $S(reopen) "msg_reopen $server"]
+        return ""
     }
 }
 
@@ -156,25 +156,23 @@ proc msg_cmd { server cmd { timeout {} } { sync sync } { code {} } } {
     set sock $S(sock)
     set line [join [concat $msgid $cmd]]
 
-    msg_debug Msg $server: $line
+    msg_debug msg_cmd $server $S(up): $line
 
-    if { [catch {
-	if { [catch {
-	    puts $sock $line
-            flush $sock
-	}] } {
-	    if { $S(up) } {
-            set sock [msg_setsock $server]
-            puts $sock $line
-            flush $sock
-	    } else {
-            return -3
-	    }
-	}
-    }] } {
-        msg_kilclient $server $sock
-        set S(reopen_timer) [after $S(reopen) "msg_reopen $server"]
-        error "server down: $server $S(host) $S(port)"
+    try {
+        msg_debug msg_cmd try $sock $line
+        puts $sock $line
+        flush $sock
+    } on error e {
+        if { !$S(up) } {
+            set sock [msg_reopen $server]
+            if { $sock ne "" } {
+                msg_debug msg_cmd try again $sock $line
+                puts $sock $line
+                flush $sock
+            } else {
+                return -3
+            }
+        }
     }
 
     if { [string compare $timeout {}] == 0 } {
@@ -359,27 +357,25 @@ proc msg_aset { args } {
 
 proc msg_setsock { server } {
 	upvar #0 $server S
-	msg_debug Sock: $server $S(host) $S(port)
+	msg_debug msg_setsock: $server $S(host) $S(port) $S(reopen)
 
     set host $S(host)
     set port $S(port)
-
-    msg_debug DoSock: $server $S(host) $S(port) $S(reopen)
 
     catch { close $S(sock) }
     catch { msg_kilclient $server $S(sock) }
 
     try { set sock [socket $host $port] } on error e {
 	    global errorInfo
-        msg_debug msg_setsock $e
+        msg_debug msg_setsock: $server $S(host) $S(port) cannot open socket
 
         error "host down : $server $host $port"
     }
-    msg_debug DoneSock: $server $S(host) $S(port)
-
     set S(sock) $sock
+    msg_debug msg_setsock: $server $S(host) $S(port) socket : $S(sock)
 
     if { $S(__apikey) ne "" } {
+        msg_debug msg_setsock: $server $S(host) $S(port) send apikey $S(__apikey)
         msg_cmd $server "api $S(__apikey)" 0 nowait
     }
 
@@ -1013,7 +1009,7 @@ proc msg_client { server { init { } } { done { } } { address {} } } {
     interp alias $server blk {} msg_cack
     interp alias $server nak {} msg_cnak
 
-    after idle [list msg_reopen $server]
+    set S(reopen_timer) [after idle [list msg_reopen $server]]
 }
 
 # Server side access control
@@ -1283,7 +1279,7 @@ proc msg_post { server name { post 1 } } {
 }
 
 proc msg_kilclient { server sock } {
-	    msg_debug Kil Server $server $sock
+    msg_debug Kil Server $server $sock
 
     upvar #0 $server S
 
