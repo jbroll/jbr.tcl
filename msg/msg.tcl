@@ -1055,7 +1055,7 @@ proc msg_publish { server name { var {} } { code {} } { comment {} } } {
     upvar #0 $var v
 
     if { ![info exists ::$var] } {
-	set ::$var {}
+        set ::$var {}
     }
     if { [string compare $code {}] != 0 } {
         trace variable v rw $code
