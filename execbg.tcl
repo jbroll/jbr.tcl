@@ -7,44 +7,44 @@ proc _execbg { file } {
         global $F(waitName)
 
         if { [string compare $F(dataName) {}] } {
-	    global $F(dataName)
+            global $F(dataName)
             global $F(incrName)
 
-	    if { ![string compare $F(trim) {}] } {
-		set $F(dataName) $F(incrName)
-	    } else {
-		set $F(dataName) [string $F(trim) [set $F(incrName)]]
-	    }
-	}
+            if { ![string compare $F(trim) {}] } {
+                set $F(dataName) $F(incrName)
+            } else {
+                set $F(dataName) [string $F(trim) [set $F(incrName)]]
+            }
+        }
 
-	close $file
+        close $file
 
         if { [file size $F(errFile)] } {
-	    if { [string compare $F(errName) {}] } {
-	        global $F(errName)
+            if { [string compare $F(errName) {}] } {
+                global $F(errName)
 
-		set efile [open $F(errFile)]
+                set efile [open $F(errFile)]
 
-		if { ![string compare $F(trim) {}] } {
-		    set $F(errName) [read $efile]
-		} else {
-		    set $F(errName) [string $F(trim) [read $efile]]
-		}
-		close $efile
-	    }
-	    set $F(waitName) 1
-	} else  {
-	    set $F(waitName) 0
-	}
-	file delete $F(errFile)
+                if { ![string compare $F(trim) {}] } {
+                    set $F(errName) [read $efile]
+                } else {
+                    set $F(errName) [string $F(trim) [read $efile]]
+                }
+                close $efile
+            }
+            set $F(waitName) 1
+        } else  {
+            set $F(waitName) 0
+        }
+        file delete $F(errFile)
     } else {
         global $F(incrName)
 
         if { [string compare $F(incrName) {}] } {
             append $F(incrName) [read $file]
-	} else {
-	    puts -nonewline [read $file]
-	}
+        } else {
+            puts -nonewline [read $file]
+        }
     }
 }
 
@@ -67,43 +67,43 @@ proc execbg { waitName args } {
     set eoo 0
     set command |
     for { set i 0 } { $i < [llength $args] } { incr i } {
-	set arg [lindex $args $i]
+        set arg [lindex $args $i]
 
-	if { !$eoo } {
-	    switch -regexp -- $arg {
-		-keepnewline 	{ set trim {} }
-		-trim 	        { set trim     [lindex $args [incr i]] }
-		-output 	{ set dataName [lindex $args [incr i]] }
-		-onoutput 	{ set incrName [lindex $args [incr i]] }
-		-error 		{ set  errName [lindex $args [incr i]] }
-		-- 		{ set eoo  1 }
-		-trap		{ set trap 1 }
-		-wait		{ set wait 1 }
-		"-.*" 		{
-		    error "execbg: unknown option: $arg"
-		}
-		".*" {
-		    lappend command $arg
-	       	    set eoo 1
-		}
-	    }
-	} else {
-	    lappend command $arg
-	}
+        if { !$eoo } {
+            switch -regexp -- $arg {
+            -keepnewline 	{ set trim {} }
+            -trim 	        { set trim     [lindex $args [incr i]] }
+            -output 	{ set dataName [lindex $args [incr i]] }
+            -onoutput 	{ set incrName [lindex $args [incr i]] }
+            -error 		{ set  errName [lindex $args [incr i]] }
+            -- 		{ set eoo  1 }
+            -trap		{ set trap 1 }
+            -wait		{ set wait 1 }
+            "-.*" 		{
+                error "execbg: unknown option: $arg"
+            }
+            ".*" {
+                lappend command $arg
+                    set eoo 1
+            }
+            }
+        } else {
+            lappend command $arg
+        }
     }
 
     lappend command 2> $errFile
 
+    print $command
     set file [open $command r]
     global $file
-
 
     if { [string compare $dataName {}] } {
     	global $dataName;  set $dataName {}
 
-	if { ![string compare $incrName {}] } {
-	    set incrName _$dataName
-	}
+        if { ![string compare $incrName {}] } {
+            set incrName _$dataName
+        }
     }
     if { [string compare $incrName {}] } {
         global $incrName;  set $incrName {}
@@ -123,16 +123,16 @@ proc execbg { waitName args } {
     fileevent $file r [list _execbg $file]
 
     if { $wait } {
-	if { $trap && ![string compare $errName {}] } {
-	    set errName [set ${file}(errName) $errFile]
-	}
-	vwait $waitName
-	if { $trap && [set ::$waitName] } {
-	    set err [set ::$errName]
+        if { $trap && ![string compare $errName {}] } {
+            set errName [set ${file}(errName) $errFile]
+        }
+        vwait $waitName
+        if { $trap && [set ::$waitName] } {
+            set err [set ::$errName]
 
-	    catch { unset ::${file}(errFile) }
-	    error $err
-	}
+            catch { unset ::${file}(errFile) }
+            error $err
+        }
     } else {
         return [pid $file]
     }
