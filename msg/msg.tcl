@@ -471,44 +471,42 @@ proc ackdone { id server index op } {
     set response [lindex $S($index) 0]
 
     if { $S(up) } {
-	if  { $response == -2 } {
-	    if { $S(hung) == 0 } {
-		set S(hung) 1
-		set S(connection) Hung
-	    }
-	} else {
-	    if { $S(hung) == 1 } {
-		set S(hung) 0
-		set S(connection) Up
-	    }
-	}
+        if  { $response == -2 } {
+            if { $S(connection) ne "Hung" } {
+                set S(connection) Hung
+            }
+        } else {
+            if { $S(connection) ne "Up" } {
+                set S(connection) Up
+            }
+        }
     }
+    print STATUS $server $S(connection)
+    return
+
     if { [catch {
-	trace vdelete  S($index) wu "ackdone $id"
-	unset S($index)
-	after cancel $S(to,${id})
-	catch { unset S(to,${id}) }
+        trace vdelete  S($index) wu "ackdone $id"
+        unset S($index)
+        after cancel $S(to,${id})
+        catch { unset S(to,${id}) }
     }] } {
-	puts "ackdone : $reply"
+        puts "ackdone : $reply"
     }
-}    
+}
 
-proc msg_keepalive { server timeout updatetime} {
+proc msg_keepalive { server { timeout 5000 } { updatetime 60000 } { prefix {} } } {
     upvar #0 $server S
-    if { ![info exists S(hung)] } {
-	set S(hung) 0
-    }
     if { $S(up) } {
-	catch {
-	    set id [msg_cmd $server ack $timeout async]
+        catch {
+            set id [msg_cmd $server ack $timeout async $prefix]
 
-	    if { [info exists S(id,$id)] } {
-		trace variable S(id,$id) wu "ackdone $id"
-	    }
-	}
+            if { [info exists S(id,$id)] } {
+                trace variable S(id,$id) wu "ackdone $id"
+            }
+        }
     }
 
-    after $updatetime "msg_keepalive $server $timeout $updatetime"
+    after $updatetime "msg_keepalive $server $timeout $updatetime $prefix"
 }
 
 proc msg_uplevel { code args } {
