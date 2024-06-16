@@ -1,0 +1,64 @@
+commit ace44a1f7a20e15f0f0c299d9f4b40c7ace17d24
+Author: John Roll <john@rkroll.com>
+Date:   Sat Jun 15 22:40:34 2024 -0400
+
+    stuff
+
+diff --git a/msg/msg.tcl b/msg/msg.tcl
+index 9a49205..6263a74 100644
+--- a/msg/msg.tcl
++++ b/msg/msg.tcl
+@@ -467,6 +467,7 @@ proc ackdone { id server index op } {
+     upvar $server S
+ 
+     set response [lindex $S($index) 0]
++    print ackdone $id $server $index $op --> $response
+ 
+     if { $S(up) } {
+         if  { $response == -2 } {
+@@ -479,7 +480,7 @@ proc ackdone { id server index op } {
+             }
+         }
+     }
+-    print STATUS $server $S(connection)
++    print STATUS $server $response $S(connection)
+     return
+ 
+     if { [catch {
+@@ -683,29 +684,25 @@ proc msg_timeout { server msgid } {
+ }
+ proc msg_response { server sock msgid ack args reply } {
+     upvar #0 $server S
+-    msg_debug C$ack: $server $msgid $args
++    msg_debug c$ack: $server $msgid $args
+ 
+     set arg [join $args]
+ 
++    set S(id,$msgid) "$reply $arg"
+     if { [info exists S(cb,$msgid)] && [string compare $S(cb,$msgid) {}] } {
+         if { [catch { set S(id,$msgid) [eval $S(cb,$msgid) $server $sock $msgid $ack $args] } reply] } {
+             puts $reply
+             set S(id,$msgid) -5
+         }
+-        if { ![string compare $S(sy,$msgid) async] } {
+-            unset S(id,$msgid)
+-        }
+-    } else {
+-        set S(id,$msgid) "$reply $arg"
+     }
+ 
++    if { $S(sy,$msgid) eq "async" } {
++        unset S(id,$msgid)
++    }
++    catch { after cancel $S(to,$msgid) }
+     catch { unset S(cb,$msgid) }
+     catch { unset S(sy,$msgid) }
+-
+-    catch { after cancel $S(to,$msgid)
+-            msg_debug C$ack Timeout Canceled: $S(to,$msgid)"
+-            catch { unset S(to,$msgid) }
+-    }
++    catch { unset S(to,$msgid) }
+ }
+ 
+ proc msg_nak { sock msgid args } {

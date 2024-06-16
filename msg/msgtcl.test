@@ -1,0 +1,41 @@
+#!/usr/bin/env tclsh
+#
+#
+
+package require jbr::msg
+package require jbr::test
+package require jbr::print
+
+test::suite msgtcl {
+    setup {
+        package require jbr::msg
+
+        set env(SERV) .:1234
+        set env(CLNT) .:1234
+        msg_server SERV
+        msg_up SERV
+        msg_client CLNT
+    }
+
+    test getset {
+        setup {
+            set ::Aserv 5
+            msg_publish SERV A Aserv
+        }
+        case-get { eq { msg_get CLNT A }  5 }
+        case-set {
+            msg_set CLNT A 6
+            eq { set ::Aserv } 6
+        }
+        case-cmd {
+            msg_cmd CLNT "set A 4"
+            eq { msg_get CLNT A } 4
+        }
+        case-sub {
+            msg_subscribe CLNT A
+            set ::Aserv 7
+            after idle {}
+            eq { msg_get CLNT A } 7
+        }
+    }
+}

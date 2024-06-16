@@ -173,11 +173,11 @@ proc msg_cmd { server cmd { timeout {} } { sync sync } { code {} } } {
         }
     }
 
-    if { [string compare $timeout {}] == 0 } {
+    if { $timeout eq {} } {
         set timeout $S(timeout)
     }
 
-    if { [string compare $sync nowait] } {
+    if { $sync ne "nowait" } {
         set S(id,$msgid) 0
         set S(to,$msgid) [after $timeout "msg_timeout $server $msgid"]
     }
@@ -185,9 +185,9 @@ proc msg_cmd { server cmd { timeout {} } { sync sync } { code {} } } {
     set S(cb,$msgid) $code
     set S(sy,$msgid) $sync
 
-    if { [string equal $sync sync] } {
+    if { $sync eq "sync" } {
         return [msg_wait $server $msgid $cmd]
-    } elseif { [string equal $sync async] } {
+    } elseif { $sync eq "async" || $sync eq "nowait" } {
         return $msgid
     } else {
         lappend S($sync) $msgid
@@ -199,7 +199,7 @@ proc msg_close { server } {
     upvar #0 $server S
 	close $S(sock)
     if { [ string compare $S(logfile) NULL ] != 0 } {
-	close $S(logfile)
+        close $S(logfile)
     }
 }
 
@@ -479,7 +479,6 @@ proc ackdone { id server index op } {
             }
         }
     }
-    print STATUS $server $S(connection)
     return
 
     if { [catch {
@@ -679,7 +678,7 @@ proc msg_cnak { server sock msgid ack args } {
     msg_response $server $sock $msgid $ack $args -1
 }
 proc msg_timeout { server msgid } {
-    msg_response $server nosock $msgid timeout {} -5
+    msg_response $server nosock $msgid timeout {} -4
 }
 proc msg_response { server sock msgid ack args reply } {
     upvar #0 $server S
@@ -699,13 +698,11 @@ proc msg_response { server sock msgid ack args reply } {
         set S(id,$msgid) "$reply $arg"
     }
 
+    catch { after cancel $S(to,$msgid) }
+
     catch { unset S(cb,$msgid) }
     catch { unset S(sy,$msgid) }
-
-    catch { after cancel $S(to,$msgid)
-            msg_debug C$ack Timeout Canceled: $S(to,$msgid)"
-            catch { unset S(to,$msgid) }
-    }
+    catch { unset S(to,$msgid) }
 }
 
 proc msg_nak { sock msgid args } {
@@ -1062,16 +1059,16 @@ proc msg_setvar { server name code timeout sync variable indx op } {
     if { [string compare $name $S(setting)] } {
 	if { $S(up) == 1 } {
 	    if { $op == "r" } {
-		set value [msg_get $server ${name} $timeout $sync]
+            set value [msg_get $server ${name} $timeout $sync]
 	    }
 	    if { $op == "w" } {
-		msg_set $server ${name} $value $timeout $sync
+            msg_set $server ${name} $value $timeout $sync
 	    }
 	}
     } else {
-	if { [string compare $code {}] } {
-	   uplevel #0 $code $variable $indx $op
-	}
+        if { [string compare $code {}] } {
+           uplevel #0 $code $variable $indx $op
+        }
     }
 }
 
