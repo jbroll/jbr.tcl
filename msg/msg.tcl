@@ -77,6 +77,8 @@ proc msg_wait { server msgid { cmd {} } } {
 
     catch { unset S(id,$msgid) }
     catch { unset S(to,$msgid) }
+    catch { unset S(cb,$msgid) }
+    catch { unset S(sy,$msgid) }
 
     if { $status == -1 } {
         error $value
@@ -89,6 +91,9 @@ proc msg_wait { server msgid { cmd {} } } {
     }
     if { $status == -4 } {
         error "msg wait aborted $msgid $cmd"
+    }
+    if { $status == -5 } {
+        error "msg wait callback error $msgid $cmd"
     }
     if { $status ==  1 } {
         return  [join [lrange [split $value " "] 1 end]]
@@ -114,13 +119,6 @@ proc msg_waitgroup { server group } {
     } else {
         return $result
     }
-}
-
-proc msg_timeout { server msgid } {
-	msg_debug Timeout: $server $msgid
-	upvar #0 $server S
-
-    set S(id,$msgid) -2
 }
 
 proc msg_reopen { server } {
@@ -674,60 +672,39 @@ proc msg_cset { server sock msgid set args } {
 	set S(setting) {}
 }
 
+proc msg_cack { server sock msgid ack args } {
+    msg_response $server $sock $msgid $ack $args  1
+}
 proc msg_cnak { server sock msgid ack args } {
-        upvar #0 $server S
+    msg_response $server $sock $msgid $ack $args -1
+}
+proc msg_timeout { server msgid } {
+    msg_response $server nosock $msgid timeout {} -5
+}
+proc msg_response { server sock msgid ack args reply } {
+    upvar #0 $server S
+    msg_debug C$ack: $server $msgid $args
 
     set arg [join $args]
 
     if { [info exists S(cb,$msgid)] && [string compare $S(cb,$msgid) {}] } {
         if { [catch { set S(id,$msgid) [eval $S(cb,$msgid) $server $sock $msgid $ack $args] } reply] } {
-	    puts $reply
-            set S(id,$msgid) -1
+            puts $reply
+            set S(id,$msgid) -5
         }
         if { ![string compare $S(sy,$msgid) async] } {
             unset S(id,$msgid)
         }
     } else {
-        set S(id,$msgid) "-1 $arg"
+        set S(id,$msgid) "$reply $arg"
     }
 
     catch { unset S(cb,$msgid) }
     catch { unset S(sy,$msgid) }
 
     catch { after cancel $S(to,$msgid)
-            msg_debug "CNak Timeout Canceled: $S(to,$msgid)"
+            msg_debug C$ack Timeout Canceled: $S(to,$msgid)"
             catch { unset S(to,$msgid) }
-    }
-}
-
-proc msg_cack { server sock msgid ack args } {
-        upvar #0 $server S
-        msg_debug CAck: $server $msgid $args
-
-    set arg [join $args]
-
-    if { [info exists S(cb,$msgid)] && [string compare $S(cb,$msgid) {}] } {
-
-        msg_debug msg_cack cb $S(cb,$msgid) $server $sock $msgid $ack $args
-        if { [catch { set S(id,$msgid) [eval $S(cb,$msgid) $server $sock $msgid $ack $args] } reply] } {
-            puts $reply
-            set S(id,$msgid) -1
-        }
-        if { ![string compare $S(sy,$msgid) async] } {
-            unset S(id,$msgid)
-        }
-    } else {
-        set S(id,$msgid) "1 $arg"
-    }
-
-    catch { unset S(cb,$msgid) }
-    catch { unset S(sy,$msgid) }
-
-    catch {
-        msg_debug "CAck Timeout Canceled: $S(to,$msgid)"
-
-        after cancel $S(to,$msgid)
-        unset S(to,$msgid)
     }
 }
 
@@ -801,14 +778,14 @@ proc msg_security { server peer sock } {
 proc msg_checkhost {hostname allow deny} {
     set host [string tolower $hostname]
     for {set i 0} {$i <= [expr [llength $allow] - 1]} {incr i 1} {
-	if {[msg_matchone $host [lindex $allow $i]] == 1} {
-	    return 1
-	}
+        if {[msg_matchone $host [lindex $allow $i]] == 1} {
+            return 1
+        }
     }
     for {set j 0} {$j <= [expr [llength  $deny] - 1]} {incr j 1} {
-	if {[msg_matchone $host [lindex  $deny $j]] == 1} {
-	    return 0
-	}
+        if {[msg_matchone $host [lindex  $deny $j]] == 1} {
+            return 0
+        }
     }
     return 1
 }
@@ -825,29 +802,27 @@ proc msg_matchone {hostname pattern} {
         set lenhost [llength $host]
 
     if {$lenhost < $lenpat} {
-	return 0
+        return 0
     }
     if {$lenpat < $lenhost} {
-	for {set c 0} {$c < [expr $lenhost - $lenpat]} {incr c 1} {
-	    set pat [linsert $pat 0 .]
-	}
+        for {set c 0} {$c < [expr $lenhost - $lenpat]} {incr c 1} {
+            set pat [linsert $pat 0 .]
+        }
     }	
     for {set i $lenhost} {$i > 0} {incr i -1} {
-	set j [expr $i - 1]  
-	set phost [lindex $host $j]
-	set ppat [lindex $pat $j]
-	if ![regexp ^$ppat$ $phost] {
-	    if {$ppat == "."} {
-		return 1
-	    } else {
-		return 0
-	    }
-	}
+        set j [expr $i - 1]  
+        set phost [lindex $host $j]
+        set ppat [lindex $pat $j]
+        if ![regexp ^$ppat$ $phost] {
+            if {$ppat == "."} {
+                return 1
+            } else {
+                return 0
+            }
+        }
     }
     return 1
 }
-
-
 
 
 proc msg_accept { server sock addr port } {
