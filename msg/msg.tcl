@@ -739,7 +739,11 @@ proc msg_rpy { sock msgid args } {
 }
 proc msg_apikey { server keys } {
     upvar #0 $server S
-    set S(__apikey) $keys
+    if { $keys eq "localhost" } {
+        set S(localhost) yes
+    } else {
+        set S(__apikey) $keys
+    }
 }
 
 proc msg_getkey { server sock } {
@@ -750,7 +754,11 @@ proc msg_getkey { server sock } {
 proc msg_security { server peer sock } {
     upvar #0 $server S
 
-    if { $S(__apikey) ne "" } {
+    if { $S(localhost) && $peer eq "localhost" } {
+        return 1
+    }
+
+    if { $S(localhost) || $S(__apikey) ne "" } {
         after 100
         set apikeys $S(__apikey)
 
@@ -833,7 +841,7 @@ proc msg_accept { server sock addr port } {
 
     set ::MsgClientMap($sock) $server
 
-    msg_debug New Client from $peer
+    msg_debug New Client $sock from $peer
 
     if { [msg_security $server $peer $sock] == 1 } {
         fileevent $sock readable "msg_handle $server $sock"
@@ -865,6 +873,7 @@ proc msg_init { server address type } {
 
     set S(server)	$server
     set S(up) 		    0
+    set S(localhost) no
     set S(connection) Down
     set S(timeout) 	 5000
     set S(reopen)  	 5000

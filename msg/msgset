@@ -1,7 +1,8 @@
-#!/usr/bin/env tclkit8.6
+#!/usr/bin/env tclsh
 #
 
-source /data/mmti/src/msg/msg.tcl
+::tcl::tm::path add $::env(HOME)/lib/tcl8/site-tcl
+package require jbr::msg
 
 if { [catch {
 	set server 	[lindex $argv 0]
