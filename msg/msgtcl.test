@@ -13,6 +13,7 @@ test::suite msgtcl {
         set env(SERV) .:1234
         set env(CLNT) .:1234
         msg_server SERV
+        msg_allow SERV { localhost }
         msg_up SERV
         msg_client CLNT
     }

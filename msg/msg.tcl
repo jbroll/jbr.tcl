@@ -1191,14 +1191,12 @@ proc msg_postafter { server sock name } {
 	upvar #0 $server S
 	upvar #0 $S($name) var
 
-	msg_debug PstA: $server $sock $name $var
+	msg_debug PostAfter: $server $sock $name $var
 
 	if { [catch {
 	    msg_puts $sock 0 set $name $var
 	    set S($name,$sock,lastup) [clock clicks -milliseconds]
 	} reply] } { puts $reply }
-
-	msg_debug PstB: $server $sock $name $var
 
 	set update $S($name,$sock,update)
 
@@ -1229,10 +1227,11 @@ proc msg_post { server name { post 1 } } {
 
         set update $S($name,$sock,update)
 
-        msg_debug Not Skipped Post: $sock $name $var : Update $update Change $change After  $S($name,$sock,after)
         if { $update > 0				\
           && $change					\
           && ![string compare $S($name,$sock,after) {}] } {
+
+            msg_debug Not Skipped Post: $sock $name $var : Update $update Change $change After  $S($name,$sock,after)
 
             set nextup [expr ($S($name,$sock,lastup)	\
                         + $S($name,$sock,update)) - $clock]
@@ -1242,15 +1241,15 @@ proc msg_post { server name { post 1 } } {
             set S($name,$sock,after) [after $nextup 	\
                 "msg_postafter $server $sock $name"]
             if { "$name" != "log" } {
-            msg_logmsg $server $sock set $name $var
+                msg_logmsg $server $sock set $name $var
             }
         }
         if { $post && $update == 0 } {
             catch {
                 msg_puts $sock 0 set $name $var
-            if { "$name" != "log" } {
-                msg_logmsg $server $sock set $name $var
-            }
+                if { "$name" != "log" } {
+                    msg_logmsg $server $sock set $name $var
+                }
                 set S($name,$sock,lastup) $clock
             }
         }

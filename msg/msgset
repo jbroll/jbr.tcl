@@ -1,8 +1,8 @@
 #!/usr/bin/env tclsh
 #
 
-::tcl::tm::path add $::env(HOME)/lib/tcl8/site-tcl
 package require jbr::msg
+package require jbr::print
 
 if { [catch {
 	set server 	[lindex $argv 0]
