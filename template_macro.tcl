@@ -11,6 +11,7 @@ oo::class create template-environment {
         variable macros {}
         variable macroArgs {}
         variable macroPaths {}
+        variable macroSuffix .m
 
         my macros {*}$args
     }
@@ -61,6 +62,7 @@ oo::class create template-environment {
         variable macros
         variable macroArgs
         variable macroPaths
+        variable macroSuffix
 
         set declairedArgs [dict get? $macroArgs $name]
 
@@ -93,8 +95,9 @@ oo::class create template-environment {
             set text [dict get $macros $name]
         } else {
             foreach path $macroPaths {
-                if { [file exists $path/$name] } {
-                    set text [cat $path/$name]
+                set filename $path/$name$macroSuffix
+                if { [file exists $filename] } {
+                    set text [cat $filename]
                     break
                 }
             } 
