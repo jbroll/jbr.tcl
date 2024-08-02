@@ -22,3 +22,9 @@ proc milliseconds { { time -0 } { now 0 } { scale 1 } } {
 
     return [expr "($time + $now) * $scale"]
 }
+
+proc every {interval body} {
+    after [milliseconds $interval] [list after idle [namespace code [info level
+    try $body
+}
+
