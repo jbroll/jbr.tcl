@@ -24,7 +24,7 @@ proc milliseconds { { time -0 } { now 0 } { scale 1 } } {
 }
 
 proc every {interval body} {
-    after [milliseconds $interval] [list after idle [namespace code [info level
+    after [milliseconds $interval] [list after idle [namespace code [info level 0]]]
     try $body
 }
 
