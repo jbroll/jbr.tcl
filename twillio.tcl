@@ -20,25 +20,29 @@ proc twilio_sms_send {account_sid auth_token from_number to_number message} {
     return $response
 }
 
+proc twillio { from to message } {
+    if {![info exists ::env(TWILIO_ACCOUNT_SID)] || ![info exists ::env(TWILIO_AUTH)]} {
+        error "TWILIO_ACCOUNT_SID and TWILIO_AUTH environment variables must be set."
+    }
+    set account_sid $::env(TWILIO_ACCOUNT_SID)
+    set auth_token $::env(TWILIO_AUTH)
+
+    return [twilio_sms_send $account_sid $auth_token $from $to $message]
+}
+
 proc twillio_main {argc argv} {
     if {$argc != 2} {
         puts stderr "Usage: $::argv0 <from_number> <to_number>"
         exit 1
     }
 
-    set from_number [lindex $argv 0]
-    set to_number [lindex $argv 1]
+    set from [lindex $argv 0]
+    set to [lindex $argv 1]
 
     set message [read stdin]
 
-    if {![info exists ::env(TWILIO_ACCOUNT_SID)] || ![info exists ::env(TWILIO_AUTH)]} {
-        puts stderr "Error: TWILIO_ACCOUNT_SID and TWILIO_AUTH environment variables must be set."
-        exit 1
-    }
-    set account_sid $::env(TWILIO_ACCOUNT_SID)
-    set auth_token $::env(TWILIO_AUTH)
+    set response [twillio $from $to $message]
 
-    set response [twilio_sms_send $account_sid $auth_token $from_number $to_number $message]
     puts $response
 }
 
