@@ -10,7 +10,7 @@ proc cron { when action } {
         {^ *Sun|Mon|Tue|Wed|Thu|Fri|Sat +at +[0-9][0-9]:[0-9][0-9] *$} {
             cron:at $when {%A at %H:%M} $action [milliseconds 7d]
         }
-        {^ *[0-9][0-9]:[0-9][0-9 *]$} {
+        {^ *[0-9][0-9]:[0-9][0-9 *] *$} {
             cron:at $when {%H:%M} $action [milliseconds 1d]
         }
         {^ *every ([0-9]+[smhdwty]) +at +([0-9]+[smhdwty]) *$} {

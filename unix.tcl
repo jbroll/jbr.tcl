@@ -3,9 +3,9 @@ proc timer { name action } {
     if { ![info exists ::timer($name,timer)] } { set ::timer($name,timer) 0 }
 
     switch $action {
-	clear { set ::timer($name,timer) 0 }
-	start { set ::timer($name,start) [clock milliseconds] }
-	stop  { set ::timer($name,timer) [expr $::timer($name,timer) + [clock milliseconds] - $::timer($name,start)] }
+        clear { set ::timer($name,timer) 0 }
+        start { set ::timer($name,start) [clock milliseconds] }
+        stop  { set ::timer($name,timer) [expr $::timer($name,timer) + [clock milliseconds] - $::timer($name,start)] }
     }
 
     format %.2f [expr $::timer($name,timer)/1000.0]
