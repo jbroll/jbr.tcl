@@ -23,6 +23,7 @@ PACKAGES="
 
     layout/layout.tcl
     msg/msg.tcl
+    json/json.tcl
     twillio.tcl
 "
 
