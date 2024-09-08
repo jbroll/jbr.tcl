@@ -1,6 +1,6 @@
 
 proc seconds { { time -0 } { now 0 } } {
-    milliseconds $time $now .001
+    format "%.14g" [milliseconds $time $now .001]
 }
 
 proc milliseconds { { time -0 } { now 0 } { scale 1 } } {
