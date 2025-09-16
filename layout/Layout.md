@@ -1,10 +1,15 @@
 # Layout - A DSL for Tcl/Tk User Interface Specification
 
-Layout is a domain-specific language for creating Tcl/Tk user interfaces without explicit widget naming. It provides a text-based 2D pictorial syntax for organizing widgets in grid layouts.
+Layout is a domain-specific language for creating Tcl/Tk user interfaces
+without explicit widget naming. It provides a text-based 2D pictorial syntax
+for organizing widgets in grid layouts.
 
 ## Overview
 
-Traditional Tk programming requires naming every widget, even when those names are only used for creation and placement. Layout eliminates this requirement by automatically generating widget names and providing intuitive syntax for common UI patterns.
+Traditional Tk programming requires naming every widget, even when those names
+are only used for creation and placement. Layout eliminates this requirement by
+automatically generating widget names and providing intuitive syntax for common
+UI patterns.
 
 ## Basic Usage
 
@@ -103,7 +108,8 @@ paned {
 
 ## Message Binding System
 
-Layout integrates with a message passing system for dynamic widget updates. Widget options can be bound to server variables or global Tcl variables.
+Layout integrates with a message passing system for dynamic widget updates.
+Widget options can be bound to server variables or global Tcl variables.
 
 ### Syntax
 
@@ -145,7 +151,8 @@ layout -in . {
 }
 ```
 
-When bound, widgets automatically update when the associated variable changes. The system handles subscription setup and cleanup automatically.
+When bound, widgets automatically update when the associated variable changes.
+The system handles subscription setup and cleanup automatically.
 
 ## Advanced Features
 

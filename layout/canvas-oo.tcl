@@ -252,6 +252,7 @@ oo::class create canvas-oo {
 
                 if { ${-width} != $imgW || ${-height} != $imgH } {
                     set resized [::image create photo -width ${-width} -height ${-height}]
+                    puts "$resized copy $photo -from 0 0 $imgW $imgH -to 0 0 [expr {${-width}-1}] [expr {${-height}-1}]"
                     $resized copy $photo -from 0 0 $imgW $imgH -to 0 0 [expr {${-width}-1}] [expr {${-height}-1}]
                     rename $photo {}
                     set photo $resized

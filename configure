@@ -2,7 +2,7 @@
 #
 package=jbr
 
-prefix=$HOME/lib/tcl8/site-tcl
+prefix=$HOME/lib/tcl9/site-tcl
 
 version=1.0
 
