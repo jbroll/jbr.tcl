@@ -1,4 +1,6 @@
 
+package require jbr::print
+
 proc filewatch { file command { interval 5000 } {mtime -} } {
     if {$mtime eq "-"} {
         if [info exists ::_twf:$file] {after cancel [set ::_twf:$file]}

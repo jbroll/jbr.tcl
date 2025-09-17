@@ -2,7 +2,7 @@
 #
 package=jbr
 
-prefix=$HOME/lib/tcl9/site-tcl
+prefix=$HOME/lib/tcl8/site-tcl
 
 version=1.0
 
@@ -22,6 +22,8 @@ PACKAGES="
     urandom.tcl     execbg.tcl
 
     layout/layout.tcl
+    layout/layoutoption.tcl
+    layout/layoutdialog.tcl
     msg/msg.tcl
     json/json.tcl
     twillio.tcl

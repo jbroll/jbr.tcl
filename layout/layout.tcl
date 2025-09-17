@@ -68,6 +68,7 @@ proc layout.register { w args } {
 }
 
       set Containers {}
+
 array set Options {
     core	{ -text -relief -padx -pady -background -foreground -height -width -justify -font -relief }
     pad		{ -padx -pady }
@@ -84,6 +85,7 @@ layout.register     entry	{ %core %pad -validate -vcmd -validatecommand -state -
 layout.register     radiobutton	{ %core %pad -command -variable -value }
 layout.register     checkbutton	{ %core %pad -command -variable -onvalue -offvalue }
 layout.register     optmenu	{ %core %pad -command -textvariable -listvariable }
+layout.register     scale	{ %core %pad -from -to -orient -resolution -digits -showvalue -tickinterval -length -sliderlength -sliderrelief -variable -command -label -value }
 
 layout.register     ttk::separator { -orient -style -cursor }
 
@@ -100,6 +102,7 @@ layout.macro _  { layout.replace ttk::separator -orient horizontal }
 layout.macro |  { layout.replace ttk::separator -orient vertical   }
 layout.macro ?  { layout.replace optmenu  -textvariable }
 layout.macro ?+ { layout.replace combobox -textvariable }
+layout.macro <--> { layout.replace scale -variable }
 
 layout.option << { layout.replace -justify left   	   }
 layout.option >> { layout.replace -justify right  	   }
@@ -108,7 +111,9 @@ layout.option >< { layout.replace -justify center 	   }
 proc layout.define { name args body } { proc $name $args "subst  {$body}" }
 
 
-proc layout.default.value    { item option w defs Defs } { upvar $defs d;  set d(-text) }
+proc layout.default.value    { item option w defs Defs } { 
+    upvar $defs d;  set d(-text) 
+}
 proc layout.default.default { join map item option w defs Defs } {
     upvar $defs d;
     upvar $Defs D;
@@ -116,10 +121,10 @@ proc layout.default.default { join map item option w defs Defs } {
     set value [string map  $map [string trim [set d(-text)]]]
 
     if { [catch { set prefix $D(-$item.$option.prefix) }] } {
-	if { [catch { set prefix $D(-$option.prefix) }] } {
-	    set prefix ""
-	    set value [string map $map [string tolower [string trim [set d(-text)]]]]
-	}
+        if { [catch { set prefix $D(-$option.prefix) }] } {
+            set prefix ""
+            set value [string map $map [string tolower [string trim [set d(-text)]]]]
+        }
     }
 
     return "$prefix$join$value"
@@ -189,7 +194,6 @@ layout.register     paned 	-container { }
 layout.register     pane 	-container { } 
 
 
-
 proc layout.col.grid { w llchild llsticky row col } {
     set llchild  [transpose $llchild]
     set llsticky [transpose $llsticky]
@@ -231,8 +235,8 @@ proc layout { w args } {
 
     if { $w eq "-in" }	{ set w [shift args]
     } else {
-	if { [lsearch $args -text] >=0 } { ttk::labelframe $w {*}$args
-	} else  			 { frame           $w {*}$args }
+        if { [lsearch $args -text] >=0 } { ttk::labelframe $w {*}$args
+        } else  			             { frame           $w {*}$args }
     }
 
     if { $w eq "." } { set w {} }
