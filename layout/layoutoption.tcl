@@ -6,8 +6,8 @@ proc layout-option-debug { args } {
 }
 
 proc layout.opt-trace { server value code } {
-	layout-option-debug trace variable ::$value w CODE:$code
-	trace variable ::$value w           $code
+	layout-option-debug trace add variable ::$value write CODE:$code
+	trace add variable ::$value write           $code
 }
 
 proc layout.option-trace { server value code } {
@@ -58,9 +58,20 @@ proc layout.opt-bind { w option server value format default} {
         set value $value%
     } else {
         layout.option-trace $server $value [list layout.opt-setoption $w $option $action $data $format]
+
+        # For range-based lookups (&), also trace the range table variable
+        # so widget updates when the ranges themselves change, not just the value
+        if { $action eq "layout.opt-buck" && $data ne "" } {
+            layout.option-trace $server $data [list layout.opt-setoption $w $option $action $data $format]
+        }
+
         if { $default eq "" } {
-            upvar ::$value v
-            set value [$action $v $data]
+            try {
+                upvar ::$value v
+                set value [$action $v $data]
+            } on error message {
+                puts "$message for ::$value"
+            }
         } else {
             set value $default
         }

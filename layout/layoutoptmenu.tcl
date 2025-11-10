@@ -9,25 +9,25 @@ proc optmenu { w args } {
     set list {}
 
     if { $textvariable ne "" && $variable eq "" } {
-	set variable $textvariable
+	    set variable $textvariable
     }
 
     set listvariable [string map [list %v $variable] $listvariable]
 
     if { $listvariable ne "" && [info exists ::$listvariable] } {
-	set list [set ::$listvariable]
+	    set list [set ::$listvariable]
     } 
     if { $listvariable ne "" } {
-	trace variable ::$listvariable w "optmenu:setlist $w"
+	    trace variable ::$listvariable w "optmenu:setlist $w"
     }
     if { $textvariable eq "" } {
-	set textvariable $variable
+	    set textvariable $variable
     }
     if { ![info exists ::$textvariable] } {
-	set ::$textvariable [lindex $list 0]
+	    set ::$textvariable [lindex $list 0]
     }
     if { $command ne "" } {
-	trace variable ::$variable w [string map "%w $w %v $variable" $command]
+	    trace variable ::$variable w [string map "%w $w %v $variable" $command]
     }
 
     optmenu:create $w $variable $textvariable $list {*}$args

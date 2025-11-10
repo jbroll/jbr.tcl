@@ -22,9 +22,13 @@ proc centerWindow {win {parent .}} {
 proc layout-dialog { w title body } {
     toplevel .dlg
     wm title .dlg "Talkie Configuration"
+    wm withdraw .dlg
     frame .dlg.x
     grid [row -in .dlg.x -sticky news $body]
+    update idletasks
     centerWindow .dlg .
+    wm deiconify .dlg
+    focus -force .dlg
     raise .dlg
 }
 

@@ -24,6 +24,7 @@ PACKAGES="
     layout/layout.tcl
     layout/layoutoption.tcl
     layout/layoutdialog.tcl
+    layout/layoutoptmenu.tcl
     msg/msg.tcl
     json/json.tcl
     twillio.tcl
