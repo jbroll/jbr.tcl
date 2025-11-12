@@ -18,7 +18,7 @@ proc optmenu { w args } {
 	    set list [set ::$listvariable]
     } 
     if { $listvariable ne "" } {
-	    trace variable ::$listvariable w "optmenu:setlist $w"
+	    trace add variable ::$listvariable write "optmenu:setlist $w"
     }
     if { $textvariable eq "" } {
 	    set textvariable $variable
@@ -27,7 +27,7 @@ proc optmenu { w args } {
 	    set ::$textvariable [lindex $list 0]
     }
     if { $command ne "" } {
-	    trace variable ::$variable w [string map "%w $w %v $variable" $command]
+	    trace add variable ::$variable write [string map "%w $w %v $variable" $command]
     }
 
     optmenu:create $w $variable $textvariable $list {*}$args
