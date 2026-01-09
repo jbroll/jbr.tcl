@@ -26,16 +26,26 @@ proc layout.opt-setvalue    { w option action data format name indx op } {
 }
 
 proc layout.opt-setoption   { w option action data format name indx op } {
-    try { 
+    try {
         if { $indx eq "" } {
             upvar #0 $name value
         } else {
             upvar #0 ${name}($indx) value
         }
 
-        $w configure $option [$action $value $data] 
+        $w configure $option [$action $value $data]
     } on error message {
         puts "setoption $name : $message"
+    }
+}
+
+# Variant of setoption for range table traces - uses a fixed value variable
+proc layout.opt-setoption-range { valuevar w option action data format name indx op } {
+    try {
+        upvar #0 $valuevar value
+        $w configure $option [$action $value $data]
+    } on error message {
+        puts "setoption-range $name ($valuevar) : $message"
     }
 }
 
@@ -62,7 +72,7 @@ proc layout.opt-bind { w option server value format default} {
         # For range-based lookups (&), also trace the range table variable
         # so widget updates when the ranges themselves change, not just the value
         if { $action eq "layout.opt-buck" && $data ne "" } {
-            layout.option-trace $server $data [list layout.opt-setoption $w $option $action $data $format]
+            layout.option-trace $server $data [list layout.opt-setoption-range $value $w $option $action $data $format]
         }
 
         if { $default eq "" } {
