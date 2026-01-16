@@ -14,8 +14,8 @@ proc iota { fr { to {} } { in 1 } } {
 	set to $fr
 	set fr 0
     }
-    set fr [expr {$fr}]
-    set to [expr {$to}]
+    set fr [expr $fr]
+    set to [expr $to]
 
     for { set res {} } { $fr < $to } { set fr [expr {$fr+$in}] } {lappend res $fr } 
     set res
