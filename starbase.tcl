@@ -118,13 +118,13 @@ proc starbase_coldel { t here } {
 
     set Ncols $T(Ncols)
 
-    set T(Header) [lreplace $T(Header) [expr $here - 1] [expr $here - 1]]
-    set T(Dashes) [lreplace $T(Dashes) [expr $here - 1] [expr $here - 1]]
+    set T(Header) [lreplace $T(Header) [expr {$here - 1}] [expr {$here - 1}]]
+    set T(Dashes) [lreplace $T(Dashes) [expr {$here - 1}] [expr {$here - 1}]]
     starbase_colmap T
 
     for { set row 1 } { $row <= $T(Nrows) } { incr row } {
         for { set col $here } { $col < $Ncols } { incr col } {
-	    if { [catch { set val $T($row,[expr $col + 1]) }] } {
+	    if { [catch { set val $T($row,[expr {$col + 1}]) }] } {
 		set T($row,$col) ""
 	    } else {
 	        set T($row,$col) $val
@@ -139,7 +139,7 @@ proc starbase_colapp { t name { here -1 } { value {} } } {
 	if { $here == -1 } {
 		set here $T(Ncols)
 	}
-	starbase_colins T $name [expr $here + 1] $value
+	starbase_colins T $name [expr {$here + 1}] $value
 }
 
 proc starbase_colins { t name here { value {} } } {
@@ -148,14 +148,14 @@ proc starbase_colins { t name here { value {} } } {
     if { [info exists T(Header)] == 0 } {
 	set T(Header) $name
     } else {
-        set T(Header) [linsert $T(Header) [expr $here - 1] $name]
+        set T(Header) [linsert $T(Header) [expr {$here - 1}] $name]
     }
     starbase_colmap T
 
     set Nrows $T(Nrows)
     for { set row 1 } { $row <= $Nrows } { incr row } {
         for { set col $T(Ncols) } { $col > $here } { incr col -1 } {
-	    if { [catch { set val $T($row,[expr $col - 1]) }] } {
+	    if { [catch { set val $T($row,[expr {$col - 1}]) }] } {
 		set T($row,$col) ""
 	    } else {
 	        set T($row,$col) $val
@@ -183,12 +183,12 @@ proc starbase_header { t fp { gets gets } } {
 	set T(H_$n) $line
 	if { [regexp -- {^ *(-)+ *(\t *(-)+ *)*} $line] } break
 	if { $n >= 2 } {
-	    set ind [string first "\t" $T(H_[expr $n-1])]
+	    set ind [string first "\t" $T(H_[expr {$n-1}])]
 	    if { $ind >= 0 } {
-		set name [string trim [string range  $T(H_[expr $n-1]) 0 [expr $ind - 1]]]
+		set name [string trim [string range  $T(H_[expr {$n-1}]) 0 [expr {$ind - 1}]]]
 		incr ind
-		set T(H_$name) [string range $T(H_[expr $n-1]) $ind end]
-		set T(N_$name) [expr $n-1]
+		set T(H_$name) [string range $T(H_[expr {$n-1}]) $ind end]
+		set T(N_$name) [expr {$n-1}]
 	    }
 	}
 
@@ -200,12 +200,12 @@ proc starbase_header { t fp { gets gets } } {
 	if { [regexp -- {^ *(-)+ *(\t *(-)+ *)*} $line] } break
 
 	if { $n >= 2 } {
-	    set ind [string first "\t" $T(H_[expr $n-1])]
+	    set ind [string first "\t" $T(H_[expr {$n-1}])]
 	    if { $ind >= 0 } {
-		set name [string trim [string range  $T(H_[expr $n-1]) 0 [expr $ind - 1]]]
+		set name [string trim [string range  $T(H_[expr {$n-1}]) 0 [expr {$ind - 1}]]]
 		incr ind
-		set T(H_$name) [string range $T(H_[expr $n-1]) $ind end]
-		set T(N_$name) [expr $n-1]
+		set T(H_$name) [string range $T(H_[expr {$n-1}]) $ind end]
+		set T(N_$name) [expr {$n-1}]
 	    }
 	}
     }
@@ -217,7 +217,7 @@ proc starbase_header { t fp { gets gets } } {
     set T(H_$n) $line
     set T(HLines) $n
 
-    set T(Header) [split $T(H_[expr $n-1])  "\t"]
+    set T(Header) [split $T(H_[expr {$n-1}])  "\t"]
     set T(Dashes) [split $T(H_$n)	    "\t"]
     set T(Ndshs)  [llength $T(Dashes)]
 
@@ -283,9 +283,9 @@ proc starbase_hdrset { t name value } {
     if { ![info exists T(H_$name)] } {
 	set n [incr T(HLines)]
 
-	set T(H_[expr $n-0]) $T(H_[expr $n-1])
-	set T(H_[expr $n-1]) $T(H_[expr $n-2])
-	set T(N_$name) [expr $n-2]
+	set T(H_[expr {$n-0}]) $T(H_[expr {$n-1}])
+	set T(H_[expr {$n-1}]) $T(H_[expr {$n-2}])
+	set T(N_$name) [expr {$n-2}]
     }
     set T(H_$name) 	  $value
     set T(H_$T(N_$name)) "$name	$value"
@@ -295,7 +295,7 @@ proc starbase_hdrput { t fp } {
 	upvar $t T
 
     if { [info exists T(HLines)] && ($T(HLines) != 0)  } {
-	    set nl [expr $T(HLines) - 2]
+	    set nl [expr {$T(HLines) - 2}]
 	    for { set l 1 } { $l <= $nl } {  incr l } {
 		puts $fp $T(H_$l)
 	    }
@@ -351,7 +351,7 @@ proc starbase_readfp { t fp { gets gets } } {
 	    set T($r,$c) {}
 	}
     }
-    set T(Nrows) [expr $r-1]
+    set T(Nrows) [expr {$r-1}]
 
     return 1
 }
@@ -458,7 +458,7 @@ proc starbase_rowapp { t { row -1 } { rowval {} } } {
 	if { $row == -1 || $row == "" } {
 		set row $T(Nrows)
 	}
-	starbase_rowins T [expr $row + 1] $rowval
+	starbase_rowins T [expr {$row + 1}] $rowval
 }
 
 proc starbase_rowins { t row { rowval {} } } {
@@ -472,9 +472,9 @@ proc starbase_rowins { t row { rowval {} } } {
 
 	set Nrows $T(Nrows)
 	set Ncols $T(Ncols)
-	for { set r $Nrows } { $r > $row } { set r [expr $r-1] } {
+	for { set r $Nrows } { $r > $row } { set r [expr {$r-1}] } {
 	    for { set c 1 } { $c <= $Ncols } { incr c } {
-		if { [catch { set val $T([expr $r-1],$c) }] } {
+		if { [catch { set val $T([expr {$r-1}],$c) }] } {
 			set val ""
 		}
 			
@@ -490,7 +490,7 @@ proc starbase_rowset { t r { rowval {} } } {
 
 	set Ncols $T(Ncols)
 	for { set c 1 } { $c <= $Ncols } { incr c } {
-	    set T($r,$c) [lindex $rowval [expr $c - 1]]
+	    set T($r,$c) [lindex $rowval [expr {$c - 1}]]
 	}
 
     set r
@@ -522,7 +522,7 @@ proc starbase_rowdel { t { row -1 } } {
     set Ncols $T(Ncols)
     for { set r $row } { $r <= $Nrows } { incr r } {
 	for { set c 1 } { $c <= $Ncols } { incr c } {
-	    if { [catch { set val $T([expr $r+1],$c) }] } {
+	    if { [catch { set val $T([expr {$r+1}],$c) }] } {
 		    set val ""
 	    }
 		    
@@ -563,25 +563,25 @@ proc starbase_httpreader { t wait sock http } {
 		
 	    if { [gets $sock line] == -1 } {
 		set T(state) -1
-		set T(HLines) [expr $T(HLines) - 1]
+		set T(HLines) [expr {$T(HLines) - 1}]
 		set T(Nrows) 0
 		return
 	    }
 
 	    if { $n >= 2 } {
-		set ind [string first "\t" $T(H_[expr $n-1])]
+		set ind [string first "\t" $T(H_[expr {$n-1}])]
 		if { $ind >= 0 } {
-		    set name [string trim [string range  $T(H_[expr $n-1]) 0 [expr $ind - 1]]]
+		    set name [string trim [string range  $T(H_[expr {$n-1}]) 0 [expr {$ind - 1}]]]
 		    incr ind
-		    set T(H_$name) [string range $T(H_[expr $n-1]) $ind end]
-		    set T(N_$name) [expr $n-1]
+		    set T(H_$name) [string range $T(H_[expr {$n-1}]) $ind end]
+		    set T(N_$name) [expr {$n-1}]
 		}
 	    }
 
 	    set T(H_$n) $line
 
 	    if { [regexp -- {^ *(-)+ *(\t *(-)+ *)*} $line] } {
-		set T(Header) [split $T(H_[expr $n-1])  "\t"]
+		set T(Header) [split $T(H_[expr {$n-1}])  "\t"]
 		set T(Dashes) [split $T(H_$n)		"\t"]
 		set T(Ndshs)  [llength $T(Dashes)]
 		
@@ -684,7 +684,7 @@ proc starbase_fromlist { t l { index no } } {
 	    incr r
 	}
 
-	set T(Nrows) [expr $r -1]
+	set T(Nrows) [expr {$r - 1}]
 	set T(Ncols) $c
 
 	return $t
@@ -716,7 +716,7 @@ proc listtostarbase { t l } {
             incr r
         }
 
-        set T(Nrows) [expr $r -1]
+        set T(Nrows) [expr {$r - 1}]
         set T(Ncols) $c
 
         if [llength $l] {
