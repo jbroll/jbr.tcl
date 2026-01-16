@@ -90,7 +90,7 @@
     }
 
         proc lencmp { a b } {
-            return [expr [string len $b] - [string len $a]]
+            return [expr {[string len $b] - [string len $a]}]
         }
 
     # Accessors for the operator table data structure.
@@ -128,7 +128,7 @@
     #
     proc push { stkName value }   { upvar $stkName stk;   lappend stk $value }
     proc pop  { stkName { n 1 } } { upvar $stkName stk;
-        set x [expr $n-1]
+        set x [expr {$n-1}]
         set top [lrange $stk end-$x end]
         set stk [lrange $stk      0 end-$n]
         if { $n == 1 } {
@@ -220,13 +220,13 @@
                         pop parens
                      }
                      default {                                                                ; # Function call, Index or comma
-                        if { $tok eq "," } { push parens [expr [pop parens]+1] }        ; # Incr function nargs
+                        if { $tok eq "," } { push parens [expr {[pop parens]+1}] }        ; # Incr function nargs
 
                         while { [top operator] ne "(" && [top operator] ne {[} } {        ; # Output function arg
                             push operands [{*}$prefix [name [set op [pop operator]]] {*}[pop operands [arity $op]]]
                         }
                         if { $tok eq ")" || $tok eq "]" } {                                ; # Output function call or Index
-                            push operands [{*}$prefix [name [pop operator]] {*}[pop operands [expr [pop parens]+1]]]
+                            push operands [{*}$prefix [name [pop operator]] {*}[pop operands [expr {[pop parens]+1}]]]
                         }
                      }
                     }
