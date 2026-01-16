@@ -2,22 +2,22 @@
 proc I { x   } { set x }
 proc K { x y } { set x }
 
-proc +   { x y } { expr $x + $y }
-proc *   { x y } { expr $x * $y }
+proc +   { x y } { expr {$x + $y} }
+proc *   { x y } { expr {$x * $y} }
 proc sum { lst } { foldl + 0 $lst }
-proc sqr { x   } { expr $x * $x }
-proc max { x y } { expr $x > $y ? $x : $y }
-proc min { x y } { expr $x < $y ? $x : $y }
+proc sqr { x   } { expr {$x * $x} }
+proc max { x y } { expr {$x > $y ? $x : $y} }
+proc min { x y } { expr {$x < $y ? $x : $y} }
 
 proc iota { fr { to {} } { in 1 } } {
     if { $to eq {} } {
 	set to $fr
 	set fr 0
     }
-    set fr [expr $fr]
-    set to [expr $to]
+    set fr [expr {$fr}]
+    set to [expr {$to}]
 
-    for { set res {} } { $fr < $to } { set fr [expr $fr+$in] } {lappend res $fr } 
+    for { set res {} } { $fr < $to } { set fr [expr {$fr+$in}] } {lappend res $fr } 
     set res
 }
 
@@ -57,7 +57,7 @@ proc zip { args } {
         set min [fold min [llength [lindex $args 1]] [lmap arg [lrange $args 2 end] { llength $arg }]]
         set args [lmap arg [lrange $args 1 end] { lrange $arg 0 $min-1 }]
     }
-    set n [iota 0 [expr [llength $args]]]
+    set n [iota 0 [expr {[llength $args]}]]
 
     join [lmap {*}[join [lmap a $n { list $a [lindex $args $a] }]] "list [join [lmap i $n { concat $$i }]]"]
 }
