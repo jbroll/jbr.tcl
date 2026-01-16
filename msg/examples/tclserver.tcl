@@ -15,11 +15,11 @@ proc keith_read { no } {
     global t1 
     global t2
 	if { $no == 1 } {
-	    set t1 [expr $t1 + 2]
+	    set t1 [expr {$t1 + 2}]
 	    set data $t1
 	}
 	if { $no == 2 } {
-	    set t2 [expr $t2 - 1]
+	    set t2 [expr {$t2 - 1}]
 	    set data $t2
 	}
 	return $data

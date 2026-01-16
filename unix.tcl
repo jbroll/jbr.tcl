@@ -5,14 +5,14 @@ proc timer { name action } {
     switch $action {
         clear { set ::timer($name,timer) 0 }
         start { set ::timer($name,start) [clock milliseconds] }
-        stop  { set ::timer($name,timer) [expr $::timer($name,timer) + [clock milliseconds] - $::timer($name,start)] }
+        stop  { set ::timer($name,timer) [expr {$::timer($name,timer) + [clock milliseconds] - $::timer($name,start)}] }
     }
 
-    format %.2f [expr $::timer($name,timer)/1000.0]
+    format %.2f [expr {$::timer($name,timer)/1000.0}]
 }
 
 proc sleep { timer } {
-    set sleepvar [namespace current]::sleep[clock seconds][expr int(rand() * 1000)]
+    set sleepvar [namespace current]::sleep[clock seconds][expr {int(rand() * 1000)}]
     after $timer [list set $sleepvar 0]
     vwait $sleepvar
     unset $sleepvar

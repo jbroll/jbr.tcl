@@ -782,12 +782,12 @@ proc msg_security { server peer sock } {
 
 proc msg_checkhost {hostname allow deny} {
     set host [string tolower $hostname]
-    for {set i 0} {$i <= [expr [llength $allow] - 1]} {incr i 1} {
+    for {set i 0} {$i <= [expr {[llength $allow] - 1}]} {incr i 1} {
         if {[msg_matchone $host [lindex $allow $i]] == 1} {
             return 1
         }
     }
-    for {set j 0} {$j <= [expr [llength  $deny] - 1]} {incr j 1} {
+    for {set j 0} {$j <= [expr {[llength  $deny] - 1}]} {incr j 1} {
         if {[msg_matchone $host [lindex  $deny $j]] == 1} {
             return 0
         }
@@ -810,12 +810,12 @@ proc msg_matchone {hostname pattern} {
         return 0
     }
     if {$lenpat < $lenhost} {
-        for {set c 0} {$c < [expr $lenhost - $lenpat]} {incr c 1} {
+        for {set c 0} {$c < [expr {$lenhost - $lenpat}]} {incr c 1} {
             set pat [linsert $pat 0 .]
         }
     }	
     for {set i $lenhost} {$i > 0} {incr i -1} {
-        set j [expr $i - 1]  
+        set j [expr {$i - 1}]  
         set phost [lindex $host $j]
         set ppat [lindex $pat $j]
         if ![regexp ^$ppat$ $phost] {
@@ -1175,12 +1175,12 @@ proc msg_ssub { server sock msgid sub name { update 1 } } {
     lappend S(+$sock) $name ; set S(+$sock) [lsort -unique $S(+$sock)]
 	lappend S(+$name) $sock ; set S(+$name) [lsort -unique $S(+$name)]
 
-	set S($name,$sock,update) [expr int($update * 1000)]
+	set S($name,$sock,update) [expr {int($update * 1000)}]
 	set S($name,$sock,lastup) [clock clicks -milliseconds]
 	set S($name,$sock,after)  {}
 
 	if { $update < 0 } {
-	    set S($name,$sock,after) [after [expr -($update)] \
+	    set S($name,$sock,after) [after [expr {-($update)}] \
 			"msg_postafter $server $sock $name"]
 	}
 
@@ -1201,7 +1201,7 @@ proc msg_postafter { server sock name } {
 	set update $S($name,$sock,update)
 
 	if { $update < 0 } {
-	    set S($name,$sock,after) [after [expr -($update)] \
+	    set S($name,$sock,after) [after [expr {-($update)}] \
 			"msg_postafter $server $sock $name"]
 	} else {
 	    set S($name,$sock,after) {}
@@ -1233,8 +1233,8 @@ proc msg_post { server name { post 1 } } {
 
             msg_debug Not Skipped Post: $sock $name $var : Update $update Change $change After  $S($name,$sock,after)
 
-            set nextup [expr ($S($name,$sock,lastup)	\
-                        + $S($name,$sock,update)) - $clock]
+            set nextup [expr {($S($name,$sock,lastup)	\
+                        + $S($name,$sock,update)) - $clock}]
 
             if { $nextup < 0 } { set nextup 0 }
 

@@ -19,7 +19,7 @@
  proc center { x1 y1 x2 y2 } { list [expr { ($x2+$x1)/2 }] [expr { ($y2+$y1)/2 }] }
  proc range  { x1 y1 x2 y2 } { list [expr { ($x2-$x1)   }] [expr { ($y2-$y1)   }] }
 
- proc bb { x y rx ry } { list [expr $x-($rx)/2.] [expr $y-($ry)/2.] [expr $x+($rx)/2.] [expr $y+($ry)/2.] }
+ proc bb { x y rx ry } { list [expr {$x-($rx)/2.}] [expr {$y-($ry)/2.}] [expr {$x+($rx)/2.}] [expr {$y+($ry)/2.}] }
  proc color { entity } {
 	if { [dict exists $entity color] } { return $::cnumber([dict get $entity color]) }
 
@@ -49,7 +49,7 @@
  safe-proc LTYPE   { args } { }
  safe-proc LAYER   { args } { dict with args {};	dict set ::dxf LAYER $name $args }
  safe-proc LINE    { args } { dict with args {};	dict set ::dxf Entity [.drawing create line $x [Y $y] $x1 [Y $y1] -fill [color $args] -tag "layer:$layer"] $args }
- safe-proc ARC     { args } { dict with args {};	dict set ::dxf Entity [.drawing create arc  {*}[bb $x [Y $y] $dist*2 $dist*2] -start [expr $a1] -extent [expr $a2-$a1] -style arc -outline [color $args] -tag "layer:$layer"] $args }
+ safe-proc ARC     { args } { dict with args {};	dict set ::dxf Entity [.drawing create arc  {*}[bb $x [Y $y] $dist*2 $dist*2] -start [expr {$a1}] -extent [expr {$a2-$a1}] -style arc -outline [color $args] -tag "layer:$layer"] $args }
  safe-proc CIRCLE  { args } { dict with args {};	dict set ::dxf Entity [.drawing create oval {*}[bb $x [Y $y] $dist*2 $dist*2] -outline [color $args] -tag "layer:$layer"] $args }
  safe-proc ELLIPSE { args } { dict with args {};	dict set ::dxf Entity [.drawing create oval {*}[bb $x [Y $y] $x1*2 $y1*2] -outline [color $args] -tag "layer:$layer"] $args }
  safe-proc SOLID   { args } { dict with args {}; 	dict set ::dxf Entity [.drawing create rect $x [Y $y] $x1 [Y $y1] -fill [color $args] -tag "layer:$layer"] $args }
@@ -150,12 +150,12 @@
 
     proc update-scale { x y } {
 	lassign [.drawing coords $::Zero] tx ty
-	set ::TX [expr -$tx]
-	set ::TY [expr -$ty]
+	set ::TX [expr {-$tx}]
+	set ::TY [expr {-$ty}]
 
 	lassign [.drawing coords $::1000] sx sy
-	set ::SX [expr 1000.0/($sx-$tx)]
-	set ::SY [expr 1000.0/($sy-$ty)]
+	set ::SX [expr {1000.0/($sx-$tx)}]
+	set ::SY [expr {1000.0/($sy-$ty)}]
 
 	show-coords $x $y
 

@@ -56,19 +56,19 @@ namespace eval 2d {
   proc inverse { transform } {
      foreach {a b c d e f} $transform {break}
 
-    set pos [expr $a * $d]
-    set neg [expr $b * $c]
-    set det [expr $pos - $neg]
+    set pos [expr {$a * $d}]
+    set neg [expr {$b * $c}]
+    set det [expr {$pos - $neg}]
 
     if { ( $det == 0.0) || (abs( $det / ($pos - $neg)) < 10e-15) } {
 	error "singular matrix"
     }
 
     foreach { a b c d } [list 						\
-	[expr   $d  / double($det)]	[expr -($b) / double($det)]	\
-	[expr -($c) / double($det)]	[expr   $a  / double($det)]] break
+	[expr {  $d  / double($det)}]	[expr {-($b) / double($det)}]	\
+	[expr {-($c) / double($det)}]	[expr {  $a  / double($det)}]] break
     foreach { e f } [list 						\
-        [expr -( $e * $a + $f * $b )]   [expr -( $e * $c + $f * $d )]] break
+        [expr {-( $e * $a + $f * $b )}]   [expr {-( $e * $c + $f * $d )}]] break
 
     list $a $b $c $d $e $f
   }

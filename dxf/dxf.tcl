@@ -116,26 +116,26 @@
     }
 
     proc rect { x y w h { t 0 } { o 0 } } {
-            set sin_t [expr sin($t * (3.14159265358979323846 * 2 / 360))]
-            set cos_t [expr cos($t * (3.14159265358979323846 * 2 / 360))]
+            set sin_t [expr {sin($t * (3.14159265358979323846 * 2 / 360))}]
+            set cos_t [expr {cos($t * (3.14159265358979323846 * 2 / 360))}]
 
 
-        set wdx [expr $w / 2.0 * $cos_t]
-        set wdy [expr $w / 2.0 * $sin_t]
-        set hdx [expr $h / 2.0 * $sin_t]
-        set hdy [expr $h / 2.0 * $cos_t]
-        set odx [expr $o     * $sin_t]
-        set ody [expr $o     * $cos_t]
+        set wdx [expr {$w / 2.0 * $cos_t}]
+        set wdy [expr {$w / 2.0 * $sin_t}]
+        set hdx [expr {$h / 2.0 * $sin_t}]
+        set hdy [expr {$h / 2.0 * $cos_t}]
+        set odx [expr {$o     * $sin_t}]
+        set ody [expr {$o     * $cos_t}]
 
-        set x1 [expr $x - $wdx - $hdx - $odx]
-        set y1 [expr $y - $wdy + $hdy - $ody]
-        set x2 [expr $x - $wdx + $hdx + $odx]
-        set y2 [expr $y - $wdy - $hdy + $ody]
+        set x1 [expr {$x - $wdx - $hdx - $odx}]
+        set y1 [expr {$y - $wdy + $hdy - $ody}]
+        set x2 [expr {$x - $wdx + $hdx + $odx}]
+        set y2 [expr {$y - $wdy - $hdy + $ody}]
 
-        set x3 [expr $x + $wdx + $hdx + $odx]
-        set y3 [expr $y + $wdy - $hdy + $ody]
-        set x4 [expr $x + $wdx - $hdx - $odx]
-        set y4 [expr $y + $wdy + $hdy - $ody]
+        set x3 [expr {$x + $wdx + $hdx + $odx}]
+        set y3 [expr {$y + $wdy - $hdy + $ody}]
+        set x4 [expr {$x + $wdx - $hdx - $odx}]
+        set y4 [expr {$y + $wdy + $hdy - $ody}]
 
         polygon $x1 $y1 $x2 $y2 $x3 $y3 $x4 $y4
     }

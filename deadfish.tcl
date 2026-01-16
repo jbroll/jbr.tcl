@@ -6,11 +6,11 @@ namespace eval deadfish {
 	::eval [join [split [regsub -all -- {[^idso]} $code {}] {}] \n]
     }
 
-    proc ! {} { uplevel { variable n; set n [expr (($n==256||$n<0)) ? 0 : $n] } }
+    proc ! {} { uplevel { variable n; set n [expr {(($n==256||$n<0)) ? 0 : $n}] } }
 
     proc i {} { !; incr n    }
     proc d {} { !; incr n -1 }
-    proc s {} { !; set n [expr $n*$n] }
+    proc s {} { !; set n [expr {$n*$n}] }
     proc o {} { !; puts $n }
 }
 

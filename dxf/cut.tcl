@@ -12,7 +12,7 @@ namespace eval cut {
 
 	    proc lrotate { list { n 1 } } {
 		set n [string map [list end [expr { [llength $list]-1 }]] $n]
-		set n [expr ($n) % [llength $list]]
+		set n [expr {($n) % [llength $list]}]
 		return [list {*}[lrange $list $n end] {*}[lrange $list 0 $n-1]]
 	    }
 
@@ -42,8 +42,8 @@ namespace eval cut {
 	    proc angle360 { a } {
 		return $a
 
-		while { $a <   0 } { set a [expr $a + 360] }
-		while { $a > 360 } { set a [expr $a - 360] }
+		while { $a <   0 } { set a [expr {$a + 360}] }
+		while { $a > 360 } { set a [expr {$a - 360}] }
 
 		return $a
 	    }
@@ -181,12 +181,12 @@ namespace eval cut {
 	repeat dxf::circ {*}[transform $::cut::transform $x $y] [expr { $r*$::cut::scale }]
     }
     proc arc { x y r start end } {
-	dxf::arc {*}[transform $::cut::transform $x $y] [expr { $r*$::cut::scale }] [angle360 [expr $start+$::cut::rot]] [angle360 [expr $end+$::cut::rot]]
+	dxf::arc {*}[transform $::cut::transform $x $y] [expr { $r*$::cut::scale }] [angle360 [expr {$start+$::cut::rot}]] [angle360 [expr {$end+$::cut::rot}]]
     }
 
     proc rect { x y w h { t 0 } { o 0 } } {
-            set sin_t [expr sin($t * (3.14159265358979323846 * 2 / 360))]
-            set cos_t [expr cos($t * (3.14159265358979323846 * 2 / 360))]
+            set sin_t [expr {sin($t * (3.14159265358979323846 * 2 / 360))}]
+            set cos_t [expr {cos($t * (3.14159265358979323846 * 2 / 360))}]
 
 
         set wdx [expr { $w / 2.0 * $cos_t }]
@@ -209,7 +209,7 @@ namespace eval cut {
         polygon $x1 $y1 $x2 $y2 $x3 $y3 $x4 $y4
     }
     proc text { x y text height { r 0 } } {
-	dxf::text {*}[transform $::cut::transform $x $y] $text [expr $::cut::scale*$height] [expr $::cut::rot*57.2957795+$r]
+	dxf::text {*}[transform $::cut::transform $x $y] $text [expr {$::cut::scale*$height}] [expr {$::cut::rot*57.2957795+$r}]
     }
 
     proc polygon { args } {

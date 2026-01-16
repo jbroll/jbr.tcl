@@ -50,11 +50,11 @@ namespace eval term {
         bg $bg
     }
     proc fg { fg } {
-        if { fg != "" } { puts -nonewline [format "\033[%dm", [expr 30 + [dict get $cmds color $fg]]] }
+        if { fg != "" } { puts -nonewline [format "\033[%dm", [expr {30 + [dict get $cmds color $fg]}]] }
     }
 
     proc bg { bg } {
-        if { bg != "" } { puts -nonewline [format "\033[%dm", [expr 40 + [dict get $cmds color $bg]]] }
+        if { bg != "" } { puts -nonewline [format "\033[%dm", [expr {40 + [dict get $cmds color $bg]}]] }
     }
 
     namespace export *

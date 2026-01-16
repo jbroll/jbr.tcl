@@ -151,9 +151,9 @@ proc msg_cmdbox { server w item comment } {
     }
 
     set label $item
-    if { ![string compare [lindex $comment [expr $len-2]] --] } {
-	set label   [lrange $comment [expr $len-2] [expr $len-1]]
-	set comment [lrange $comment 0 [expr $len-3]]
+    if { ![string compare [lindex $comment [expr {$len-2}]] --] } {
+	set label   [lrange $comment [expr {$len-2}] [expr {$len-1}]]
+	set comment [lrange $comment 0 [expr {$len-3}]]
     }
 
     regsub -all -- \001                 $label { } label

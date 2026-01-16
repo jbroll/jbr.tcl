@@ -17,7 +17,7 @@ proc urandom {{min 0} {max 1}} {
        if { $min eq "int" } {
            set randomNumber $n 
        } else {
-           set randomNumber [expr (($n/18446744073709551615.0) * ($max - $min)) + $min]
+           set randomNumber [expr {(($n/18446744073709551615.0) * ($max - $min)) + $min}]
        }
 
        return $randomNumber

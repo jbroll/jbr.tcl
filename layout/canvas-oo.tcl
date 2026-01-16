@@ -26,7 +26,7 @@ oo::class create canvas-oo {
         
         set c $canvas
         set C(,tr) [2d::transforms [2d::scale 1 -1]	\
-                [2d::translate [expr [$c cget -width]/2.0] [expr [$c cget -height]/2.0]] {*}$Tr]
+                [2d::translate [expr {[$c cget -width]/2.0}] [expr {[$c cget -height]/2.0}]] {*}$Tr]
         
         set C(,rt)   0
         set C(,lst) {}
@@ -49,7 +49,7 @@ oo::class create canvas-oo {
         set id [my tag $id]
         
         foreach { type x y r } [set C($id,pos)] break
-        foreach {      x y r } [list [expr $x+$dx] [expr $y+$dy] [expr $r+$dr]] break
+        foreach {      x y r } [list [expr {$x+$dx}] [expr {$y+$dy}] [expr {$r+$dr}]] break
         
         amov $id $x $y $r
     }
@@ -77,7 +77,7 @@ oo::class create canvas-oo {
         
         set C($id,pos) [list $type $x $y $r]
         set C($id,tr)  [2d::transforms [2d::rotate $r d] [2d::scale {*}$C($id,sc)] [2d::translate $x $y] $C($C($id,in),tr)]
-        set C($id,rt)  [expr $r + $C($C($id,in),rt)]
+        set C($id,rt)  [expr {$r + $C($C($id,in),rt)}]
         set C($id,ok)  0
         
         foreach id $C($id,lst) { rmov $id 0 0 0 }
@@ -125,8 +125,8 @@ oo::class create canvas-oo {
                     set ry $C($id,rx)
                     set  A $C($id,A)
                     
-                    set sx [expr sqrt([lindex $tr 0]*[lindex $tr 0]+[lindex $tr 1]*[lindex $tr 1])]
-                    set xy [my $ex [expr $rx*$sx] [expr $ry*$sx] {*}$A]
+                    set sx [expr {sqrt([lindex $tr 0]*[lindex $tr 0]+[lindex $tr 1]*[lindex $tr 1])}]
+                    set xy [my $ex [expr {$rx*$sx}] [expr {$ry*$sx}] {*}$A]
                     
                     $c coords $id [2d::transform [2d::translate [lindex $tr 4] [lindex $tr 5]] $xy]
                 }
@@ -141,7 +141,7 @@ oo::class create canvas-oo {
                             -total  { set rt [expr { -($C($id,rt)) }]  }
                             -parent { set rt [expr { -(-($C($C($id,in),rt)) + [lindex $C($id,pos) 3]) }] }
                             total  { set rt $C($id,rt) }
-                            parent { set rt [expr -($C($C($id,in),rt)) + [lindex $C($id,pos) 3]] }
+                            parent { set rt [expr {-($C($C($id,in),rt)) + [lindex $C($id,pos) 3]}] }
                             default { error "invalid -rmode : $C($id,-rmode)" }
                         }
                         $c itemconfigure $id -angle $rt
@@ -153,8 +153,8 @@ oo::class create canvas-oo {
         foreach id $C($id,lst) { draw $id }
     }
     
-    method bb { rx ry } { list [expr -($rx)/2.] [expr -($ry)/2.] [expr +($rx)/2.] [expr +($ry)/2.] }  ; # Bounding Box
-    method rp { x y args } { ::polygon 0 0 [expr $x/2.0] [expr $y/2.0] {*}$args }				      ; # Regular polygon
+    method bb { rx ry } { list [expr {-($rx)/2.}] [expr {-($ry)/2.}] [expr {+($rx)/2.}] [expr {+($ry)/2.}] }  ; # Bounding Box
+    method rp { x y args } { ::polygon 0 0 [expr {$x/2.0}] [expr {$y/2.0}] {*}$args }				      ; # Regular polygon
     method xy { x y args } { list $x $y }								 	                          ; # return pair
     method xx { x y args } { return  $x }									                          ; # return x
     method rt { rx ry args } {											                              ; # Rectangle
@@ -258,13 +258,13 @@ oo::class create canvas-oo {
                     set photo $resized
                 }
 
-                set sx [expr sqrt([lindex $tx 0]*[lindex $tx 0]+[lindex $tx 1]*[lindex $tx 1])]
-                set xy [my $expn [expr $rx*$sx] [expr $ry*$sx] {*}$A]
+                set sx [expr {sqrt([lindex $tx 0]*[lindex $tx 0]+[lindex $tx 1]*[lindex $tx 1])}]
+                set xy [my $expn [expr {$rx*$sx}] [expr {$ry*$sx}] {*}$A]
                 set id [$c create $type [2d::transform $tx {*}$xy] -image $photo {*}$B]
             }
             window {
-                set sx [expr sqrt([lindex $tx 0]*[lindex $tx 0]+[lindex $tx 1]*[lindex $tx 1])]
-                set xy [my $expn [expr $rx*$sx] [expr $ry*$sx] {*}$A]
+                set sx [expr {sqrt([lindex $tx 0]*[lindex $tx 0]+[lindex $tx 1]*[lindex $tx 1])}]
+                set xy [my $expn [expr {$rx*$sx}] [expr {$ry*$sx}] {*}$A]
                 
                 lappend B -width [lindex $xy 0] -height [lindex $xy 1]
                 
@@ -298,8 +298,8 @@ oo::class create canvas-oo {
         set C($id,ok)    0
         set C($id,ex)  $expn
         set C($id,A)   $A
-        set C($id,rt)  [expr $r + $C($C($id,in),rt)]
-        
+        set C($id,rt)  [expr {$r + $C($C($id,in),rt)}]
+
         lappend C($in,lst) $id
         
         foreach { name value } $A { set C($id,$name) $value }
