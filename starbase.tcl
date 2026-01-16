@@ -746,8 +746,8 @@ proc starbase_sortsel { t col { options {} } { fun {} } { select - } } {
     }
 
     set sort {}
-    set list [eval lsort -index 1 $args \$list]
-    foreach row $L {
+    set list [eval lsort -index 1 $options \$list]
+    foreach row $list {
 	lappend sort [lindex $row 0]
     }
     return $sort
@@ -757,7 +757,7 @@ proc starbase_sortsel { t col { options {} } { fun {} } { select - } } {
 proc starbase_rows { t rows } {
     upvar $t T
 
-    if { [info exists T(rows) } {
+    if { [info exists T(rows)] } {
 	set prev $T(rows)
     } else {
 	set prev *
