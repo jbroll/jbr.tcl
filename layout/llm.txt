@@ -212,6 +212,38 @@ $::ui::install_btn configure -state disabled
 set ::ui::install_state "disabled"   ;# widget updates automatically
 ```
 
+**Use plain globals for all Tk-facing variables — not namespace variables:**
+
+Tk's `-textvariable`, `-variable`, and layoutoption's `:varname` traces all use
+`upvar #0 name` to resolve variables. When a namespace variable is linked via
+`variable foo` inside a proc, traces fire with the local name (`foo`), not the
+fully-qualified name (`::ns::foo`), so `upvar #0` resolves to `::foo` instead —
+silently binding the wrong variable.
+
+Additionally, `::ns::varname` in any option value is parsed by layoutoption as
+`server=ns`, `variable=varname`, breaking the binding.
+
+The fix: declare all widget-bound state as plain globals at the top level and
+access them with `global` in procs.
+
+```tcl
+# At top level — plain globals, no namespace
+set action_label "Remove"
+set status_text  "Ready"
+set current_mode "installed"
+
+# In namespace procs
+proc myns::update {} {
+    global action_label status_text current_mode
+    set current_mode "available"
+    set action_label "Install"
+}
+
+# In layout — :varname binds to ::varname cleanly
+! "x" -textvariable action_label -command do_action
+@ "x" -textvariable status_text
+```
+
 **Don't substitute variables inside layout body braces:**
 ```tcl
 # Bad — no Tcl substitution inside braces
