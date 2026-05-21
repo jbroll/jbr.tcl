@@ -191,6 +191,18 @@ layout.treeview.widths $::ui::tree {
 ! "OK" -command on_ok
 ```
 
+**Don't use Tcl namespace qualifiers in `-command` when layoutoption is loaded:**
+
+`layoutoption` scans every option value for the `server:variable` binding syntax.
+`xbps::list_installed` matches (`server=xbps`, `name=list_installed`), breaking the command.
+Use `interp alias` to create unqualified global names:
+
+```tcl
+interp alias {} list_installed {} xbps::list_installed
+# Then in layout:
+! "Installed" -command list_installed   ;# no :: — safe
+```
+
 **Don't call configure to manage state — use variable binding:**
 ```tcl
 # Bad
