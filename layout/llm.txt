@@ -1,0 +1,233 @@
+# jbr.tcl Layout DSL — LLM Reference
+
+A grid-based UI DSL for Tcl/Tk. Eliminates explicit widget naming. Widgets flow
+left-to-right; `&` moves to the next row.
+
+## Packages
+
+```tcl
+package require jbr::layout        ;# core DSL (layout, row, col)
+package require jbr::layoutoption  ;# variable binding via :varname syntax
+package require jbr::layouttreeview ;# ttk::treeview helpers
+```
+
+## Widget Shortcuts
+
+| Symbol | Widget        |
+|--------|---------------|
+| `@`    | label         |
+| `!`    | button        |
+| `=`    | entry         |
+| `*`    | radiobutton   |
+| `~`    | checkbutton   |
+| `?`    | optmenu       |
+| `?+`   | combobox      |
+| `_`    | hseparator    |
+| `\|`   | vseparator    |
+
+## Grid Control
+
+- `-` span to next column
+- `x` empty cell
+- `.` set global/default options, no widget
+- `&` next row
+
+## Basic Layout
+
+```tcl
+grid [layout .main {
+    -sticky news -colweight 1
+
+    @ "Name:" = ::name_var -width 30 &
+    @ "Email:" = ::email_var -width 30 &
+    x ! "Submit" -command on_submit
+}] -sticky news
+grid columnconfigure . 0 -weight 1
+grid rowconfigure    . 0 -weight 1
+```
+
+## Capturing Widget Paths
+
+Use `::varname` immediately after the widget type (or shortcut) to store the
+generated widget path in a variable. Use only when you need it for bindings or
+post-creation configuration.
+
+```tcl
+layout .main {
+    entry ::ui::search -textvariable ::term -width 30
+    ! "Go" -command do_search
+}
+bind $::ui::search <Return> do_search
+```
+
+## Variable Binding (jbr::layoutoption)
+
+`package require jbr::layoutoption` overrides `layout.options` to parse a
+binding syntax for any widget option. When an option value matches `:varname`
+(or `server:varname,default`), the layout package sets up a Tcl variable trace
+so the widget option updates automatically whenever the variable changes.
+
+Syntax: `:namespace::varname` (global variable, server omitted)
+
+```tcl
+# Buttons whose enabled/disabled state tracks Tcl variables
+! "Install" -state ":ui::install_state" -command do_install
+! "Remove"  -state ":ui::remove_state"  -command do_remove
+```
+
+Setting `::ui::install_state "disabled"` immediately disables the button.
+Setting it `"normal"` re-enables it. No configure calls needed.
+
+The initial widget state is read from the variable at creation time (no
+`,default` needed if the variable is already set).
+
+**Native Tk bindings** (no layoutoption needed):
+- `-textvariable ::varname` — button/label/entry text tracks the variable
+- `-variable ::varname` — checkbutton/radiobutton value tracks the variable
+
+```tcl
+set ::ui::update_label "Update All"
+! "x" -textvariable ::ui::update_label -state ":ui::update_state" -command do_update
+# Changing ::ui::update_label changes button text; ::ui::update_state controls enabled state
+```
+
+## Global / Default Options
+
+Use `.` to set defaults applied to subsequent widgets of a given type:
+
+```tcl
+layout {
+    . -radiobutton.variable ::filter
+    . -radiobutton.command  on_filter_change
+    * "All"       -value all
+    * "Installed" -value installed
+    * "Available" -value available
+}
+```
+
+## Row Weights and Sticky
+
+```tcl
+layout .main {
+    -sticky news -colweight 1       ;# all widgets sticky, col 0 stretches
+
+    -rowweight 2
+    frame ::ui::pkg_frame -sticky news - - - -  ;# spans 4 columns, 2x row weight
+    &
+    -rowweight 1
+    frame ::ui::detail_frame -sticky news - - - -
+}
+```
+
+## Containers
+
+### row / col
+
+`row` arranges children left-to-right; `col` top-to-bottom.
+
+```tcl
+row -sticky news {
+    . -sticky news          ;# spacer fills left
+    ! "OK"     -command ok
+    ! "Cancel" -command cancel
+}
+```
+
+### notebook
+
+```tcl
+notebook {
+    page "Packages" { ... }
+    page "Updates"  { ... }
+}
+```
+
+### paned
+
+```tcl
+paned -orient horizontal {
+    pane { @ "Left"  }
+    pane { @ "Right" }
+}
+```
+
+### scroll (jbr::layoutscroll)
+
+```tcl
+scroll .container {
+    @ "Line 1"
+    @ "Line 2"
+}
+scroll .container -scroll vh { ... }   ;# both scrollbars
+```
+
+## Treeview (jbr::layouttreeview)
+
+```tcl
+package require jbr::layouttreeview
+
+# Create scrolled treeview
+set ::ui::tree [layout.treeview.scrolled $::ui::pkgframe pkgtree \
+    -columns {check name version description} \
+    -show headings \
+    -selectmode browse]
+
+layout.treeview.columns $::ui::tree {
+    check ""    name "Package"    version "Version"    description "Description"
+}
+layout.treeview.widths $::ui::tree {
+    check 30    name 180          version 100           description 400
+}
+```
+
+## Anti-Patterns
+
+**Don't name widgets you don't need:**
+```tcl
+# Bad
+! ::ui::ok_btn "OK" -command on_ok
+
+# Good — let layout manage it
+! "OK" -command on_ok
+```
+
+**Don't call configure to manage state — use variable binding:**
+```tcl
+# Bad
+$::ui::install_btn configure -state disabled
+
+# Good — with jbr::layoutoption loaded
+set ::ui::install_state "disabled"   ;# widget updates automatically
+```
+
+**Don't substitute variables inside layout body braces:**
+```tcl
+# Bad — no Tcl substitution inside braces
+set color "#e0e0e0"
+layout { -label.background $color ... }
+
+# Good — pass options outside braces
+layout -background $color { ... }
+```
+
+**Hex colors inside layout bodies need quoting** (# starts a comment):
+```tcl
+# Bad
+-label.background #e0e0e0
+
+# Good
+-label.background "#e0e0e0"
+```
+
+## Binding Syntax Reference (jbr::layoutoption)
+
+Full pattern: `server:variable%format,default`
+
+| Syntax                    | Meaning                                           |
+|---------------------------|---------------------------------------------------|
+| `:varname`                | bind to `::varname`                               |
+| `:varname,default`        | bind to `::varname`, use `default` if unset       |
+| `:varname@listvar`        | index into `::listvar` using `::varname` as index |
+| `:varname#hashvar`        | look up `::varname` in array `::hashvar`          |
+| `:varname!procname`       | transform `::varname` via `procname`              |
+| `server:varname,default`  | subscribe to server message bus variable          |
