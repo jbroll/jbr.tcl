@@ -87,7 +87,12 @@ critcl::cproc mesh::encode_packet {
     Tcl_Obj*    payload_obj
 } Tcl_Obj* {
     Tcl_Size pay_len;
-    const uint8_t *pay = Tcl_GetByteArrayFromObj(payload_obj, &pay_len);
+    const uint8_t *pay = (const uint8_t *)Tcl_GetBytesFromObj(interp, payload_obj, &pay_len);
+    if (!pay) return NULL;
+    if (pay_len > 220) {
+        Tcl_SetResult(interp, "mesh: payload exceeds 220-byte LoRa MTU limit", TCL_STATIC);
+        return NULL;
+    }
 
     uint8_t pb_buf[4096];
     int pb_len = encode_toradio(pb_buf, (uint32_t)to_node, port_num,
