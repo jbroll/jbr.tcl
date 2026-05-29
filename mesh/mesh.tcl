@@ -48,6 +48,16 @@ static int pb_field_len(uint8_t *buf, int fn, const uint8_t *data, int len) {
     return n + len;
 }
 
+/* write tag + 32-bit little-endian fixed value; returns bytes written */
+static int pb_field_fixed32(uint8_t *buf, int fn, uint32_t v) {
+    int n = pb_varint(buf, PB_TAG(fn, PB_32BIT));
+    buf[n++] = (uint8_t)( v        & 0xff);
+    buf[n++] = (uint8_t)((v >> 8)  & 0xff);
+    buf[n++] = (uint8_t)((v >> 16) & 0xff);
+    buf[n++] = (uint8_t)((v >> 24) & 0xff);
+    return n;
+}
+
 /* encode Data { portnum, payload } -> buf; returns bytes written */
 static int encode_data(uint8_t *buf, int portnum,
                        const uint8_t *payload, int payload_len) {
@@ -57,15 +67,16 @@ static int encode_data(uint8_t *buf, int portnum,
     return n;
 }
 
-/* encode MeshPacket { to, decoded:Data } -> buf; returns bytes written */
+/* encode MeshPacket { to (field 2, fixed32), decoded:Data (field 4) }
+   -> buf; returns bytes written. to/from are fixed32 in mesh.proto. */
 static int encode_meshpacket(uint8_t *buf, uint32_t to_node,
                              int portnum,
                              const uint8_t *payload, int payload_len) {
     uint8_t data_buf[2048];
     int data_len = encode_data(data_buf, portnum, payload, payload_len);
     int n = 0;
-    n += pb_field_varint(buf + n, 3, (uint64_t)to_node);
-    n += pb_field_len   (buf + n, 4, data_buf, data_len);
+    n += pb_field_fixed32(buf + n, 2, to_node);
+    n += pb_field_len    (buf + n, 4, data_buf, data_len);
     return n;
 }
 
@@ -156,11 +167,23 @@ static void decode_meshpacket(const uint8_t *buf, int start, int len, MeshFields
         if (!pb_read_varint(buf, end, &off, &tag)) break;
         int fn = (int)(tag >> 3);
         int wt = (int)(tag & 7);
-        if (fn == 1 && wt == PB_VARINT) {
-            uint64_t v; if (pb_read_varint(buf, end, &off, &v)) m->from_node = (uint32_t)v;
-        } else if (fn == 3 && wt == PB_VARINT) {
-            uint64_t v; if (pb_read_varint(buf, end, &off, &v)) m->to_node   = (uint32_t)v;
-        } else if (fn == 4 && wt == PB_LEN) {
+        if (fn == 1 && wt == PB_32BIT) {           /* from: fixed32 */
+            if (off + 4 <= end) {
+                m->from_node = (uint32_t)buf[off]
+                    | ((uint32_t)buf[off+1] << 8)
+                    | ((uint32_t)buf[off+2] << 16)
+                    | ((uint32_t)buf[off+3] << 24);
+                off += 4;
+            }
+        } else if (fn == 2 && wt == PB_32BIT) {    /* to: fixed32 */
+            if (off + 4 <= end) {
+                m->to_node = (uint32_t)buf[off]
+                    | ((uint32_t)buf[off+1] << 8)
+                    | ((uint32_t)buf[off+2] << 16)
+                    | ((uint32_t)buf[off+3] << 24);
+                off += 4;
+            }
+        } else if (fn == 4 && wt == PB_LEN) {      /* decoded: Data */
             uint64_t v;
             if (pb_read_varint(buf, end, &off, &v)) {
                 /* decode_data sets payload_off relative to (buf+off);
@@ -170,12 +193,12 @@ static void decode_meshpacket(const uint8_t *buf, int start, int len, MeshFields
                 m->payload_off += data_start;  /* adjust to global buf offset */
                 off += (int)v;
             }
-        } else if (fn == 8 && wt == PB_32BIT) {
+        } else if (fn == 8 && wt == PB_32BIT) {    /* rx_snr: float */
             if (off + 4 <= end) {
                 memcpy(&m->rx_snr, buf + off, 4);
                 off += 4;
             }
-        } else if (fn == 14 && wt == PB_VARINT) {
+        } else if (fn == 12 && wt == PB_VARINT) {  /* rx_rssi: int32 varint */
             uint64_t v; if (pb_read_varint(buf, end, &off, &v)) m->rx_rssi = (int32_t)v;
         } else {
             if (!pb_skip(buf, end, &off, wt)) break;

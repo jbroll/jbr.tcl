@@ -1,0 +1,15 @@
+Package jbr::mesh 1.0
+Meta platform linux-unknown-x86_64
+Meta build::date 2026-05-29
+Meta generated::by {critcl 3.3.1} john
+Meta generated::date critcl
+Meta require {Tcl 8.6}
+Meta entrytclcommand {eval [list ::apply {dir {
+    source [file join $dir critcl-rt.tcl]
+    set path [file join $dir [::critcl::runtime::MapPlatform]]
+    set ext [info sharedlibextension]
+    set lib [file join $path "mesh$ext"]
+    load $lib Mesh
+    package provide jbr::mesh 1.0
+}} $dir]}
+Meta included critcl-rt.tcl linux-x86_64/mesh.so
