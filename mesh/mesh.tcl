@@ -2,8 +2,7 @@
 package require critcl 3.1
 package provide jbr::mesh 1.0
 
-critcl::tcl 9.1
-critcl::clibraries -L/home/john/lib -ltclstub
+critcl::tcl 8.6
 
 namespace eval mesh {
     variable fd       ""
@@ -192,9 +191,9 @@ critcl::cproc mesh::decode_frame {
     Tcl_Interp* interp
     Tcl_Obj*    frame_obj
 } Tcl_Obj* {
-    Tcl_Size frame_len = 0;
-    const uint8_t *buf = (const uint8_t *)Tcl_GetBytesFromObj(interp, frame_obj, &frame_len);
-    if (!buf && frame_len != 0) return NULL;
+    int frame_len = 0;
+    const uint8_t *buf = (const uint8_t *)Tcl_GetByteArrayFromObj(frame_obj, &frame_len);
+    if (!buf) return NULL;
 
     MeshFields m;
     memset(&m, 0, sizeof(m));
@@ -220,26 +219,26 @@ critcl::cproc mesh::decode_frame {
 
     Tcl_Obj *dict = Tcl_NewDictObj();
     Tcl_DictObjPut(interp, dict,
-        Tcl_NewStringObj("portnum", TCL_AUTO_LENGTH), Tcl_NewIntObj(m.portnum));
+        Tcl_NewStringObj("portnum", -1), Tcl_NewIntObj(m.portnum));
     Tcl_DictObjPut(interp, dict,
-        Tcl_NewStringObj("from", TCL_AUTO_LENGTH),
+        Tcl_NewStringObj("from", -1),
         Tcl_NewWideIntObj((Tcl_WideInt)(uint64_t)m.from_node));
     Tcl_DictObjPut(interp, dict,
-        Tcl_NewStringObj("to",   TCL_AUTO_LENGTH),
+        Tcl_NewStringObj("to",   -1),
         Tcl_NewWideIntObj((Tcl_WideInt)(uint64_t)m.to_node));
     Tcl_DictObjPut(interp, dict,
-        Tcl_NewStringObj("rssi", TCL_AUTO_LENGTH), Tcl_NewIntObj(m.rx_rssi));
+        Tcl_NewStringObj("rssi", -1), Tcl_NewIntObj(m.rx_rssi));
     Tcl_DictObjPut(interp, dict,
-        Tcl_NewStringObj("snr",  TCL_AUTO_LENGTH), Tcl_NewDoubleObj((double)m.rx_snr));
+        Tcl_NewStringObj("snr",  -1), Tcl_NewDoubleObj((double)m.rx_snr));
 
     if (m.payload_off >= 0 &&
         m.payload_off + m.payload_len <= (int)frame_len) {
         Tcl_DictObjPut(interp, dict,
-            Tcl_NewStringObj("payload", TCL_AUTO_LENGTH),
+            Tcl_NewStringObj("payload", -1),
             Tcl_NewByteArrayObj(buf + m.payload_off, m.payload_len));
     } else {
         Tcl_DictObjPut(interp, dict,
-            Tcl_NewStringObj("payload", TCL_AUTO_LENGTH),
+            Tcl_NewStringObj("payload", -1),
             Tcl_NewByteArrayObj(NULL, 0));
     }
 
@@ -255,9 +254,9 @@ critcl::cproc mesh::encode_packet {
     int         port_num
     Tcl_Obj*    payload_obj
 } Tcl_Obj* {
-    Tcl_Size pay_len = 0;
-    const uint8_t *pay = (const uint8_t *)Tcl_GetBytesFromObj(interp, payload_obj, &pay_len);
-    if (!pay && pay_len != 0) return NULL;
+    int pay_len = 0;
+    const uint8_t *pay = (const uint8_t *)Tcl_GetByteArrayFromObj(payload_obj, &pay_len);
+    if (!pay) return NULL;
     if (pay_len > 220) {
         Tcl_SetResult(interp, "mesh: payload exceeds 220-byte LoRa MTU limit", TCL_STATIC);
         return NULL;

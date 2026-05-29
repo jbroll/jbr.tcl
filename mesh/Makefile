@@ -8,8 +8,9 @@ all:
 	$(CRITCL) -pkg mesh.tcl
 
 install: all
-	rm -rf ~/lib/mesh
-	cp -r lib/mesh ~/lib/mesh
+	mkdir -p $(HOME)/lib/tcl8/lib
+	rm -rf $(HOME)/lib/tcl8/lib/mesh
+	cp -r lib/mesh $(HOME)/lib/tcl8/lib/mesh
 
 clean:
 	rm -rf lib
