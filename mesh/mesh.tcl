@@ -219,26 +219,26 @@ critcl::cproc mesh::decode_frame {
 
     Tcl_Obj *dict = Tcl_NewDictObj();
     Tcl_DictObjPut(interp, dict,
-        Tcl_NewStringObj("portnum", -1), Tcl_NewIntObj(m.portnum));
+        Tcl_NewStringObj("portnum", TCL_AUTO_LENGTH), Tcl_NewIntObj(m.portnum));
     Tcl_DictObjPut(interp, dict,
-        Tcl_NewStringObj("from", -1),
+        Tcl_NewStringObj("from", TCL_AUTO_LENGTH),
         Tcl_NewWideIntObj((Tcl_WideInt)(uint64_t)m.from_node));
     Tcl_DictObjPut(interp, dict,
-        Tcl_NewStringObj("to",   -1),
+        Tcl_NewStringObj("to",   TCL_AUTO_LENGTH),
         Tcl_NewWideIntObj((Tcl_WideInt)(uint64_t)m.to_node));
     Tcl_DictObjPut(interp, dict,
-        Tcl_NewStringObj("rssi", -1), Tcl_NewIntObj(m.rx_rssi));
+        Tcl_NewStringObj("rssi", TCL_AUTO_LENGTH), Tcl_NewIntObj(m.rx_rssi));
     Tcl_DictObjPut(interp, dict,
-        Tcl_NewStringObj("snr",  -1), Tcl_NewDoubleObj((double)m.rx_snr));
+        Tcl_NewStringObj("snr",  TCL_AUTO_LENGTH), Tcl_NewDoubleObj((double)m.rx_snr));
 
     if (m.payload_off >= 0 &&
         m.payload_off + m.payload_len <= (int)frame_len) {
         Tcl_DictObjPut(interp, dict,
-            Tcl_NewStringObj("payload", -1),
+            Tcl_NewStringObj("payload", TCL_AUTO_LENGTH),
             Tcl_NewByteArrayObj(buf + m.payload_off, m.payload_len));
     } else {
         Tcl_DictObjPut(interp, dict,
-            Tcl_NewStringObj("payload", -1),
+            Tcl_NewStringObj("payload", TCL_AUTO_LENGTH),
             Tcl_NewByteArrayObj(NULL, 0));
     }
 
@@ -249,7 +249,7 @@ critcl::cproc mesh::decode_frame {
 # Returns a binary Tcl value: the StreamAPI-framed ToRadio protobuf
 critcl::cproc mesh::encode_packet {
     Tcl_Interp* interp
-    unsigned    to_node
+    long        to_node
     int         port_num
     Tcl_Obj*    payload_obj
 } Tcl_Obj* {
