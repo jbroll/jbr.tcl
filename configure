@@ -31,6 +31,9 @@ PACKAGES="
     twillio.tcl
 "
 
+# NOTE: jbr::mesh is a critcl package; install separately:
+#   cd mesh && make install    (builds mesh.so, installs to ~/lib/tcl8/lib/mesh/)
+
 OFS="$IFS"
 for arg in $* ;  do
     case $arg in 
