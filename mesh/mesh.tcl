@@ -2,6 +2,7 @@
 package require critcl 3.1
 package provide jbr::mesh 1.0
 
+critcl::tcl 9.1
 critcl::clibraries -L/home/john/lib -ltclstub
 
 namespace eval mesh {
@@ -191,9 +192,9 @@ critcl::cproc mesh::decode_frame {
     Tcl_Interp* interp
     Tcl_Obj*    frame_obj
 } Tcl_Obj* {
-    Tcl_Size frame_len;
+    Tcl_Size frame_len = 0;
     const uint8_t *buf = (const uint8_t *)Tcl_GetBytesFromObj(interp, frame_obj, &frame_len);
-    if (!buf) return NULL;
+    if (!buf && frame_len != 0) return NULL;
 
     MeshFields m;
     memset(&m, 0, sizeof(m));
@@ -242,6 +243,7 @@ critcl::cproc mesh::decode_frame {
             Tcl_NewByteArrayObj(NULL, 0));
     }
 
+    Tcl_IncrRefCount(dict);
     return dict;
 }
 
@@ -253,9 +255,9 @@ critcl::cproc mesh::encode_packet {
     int         port_num
     Tcl_Obj*    payload_obj
 } Tcl_Obj* {
-    Tcl_Size pay_len;
+    Tcl_Size pay_len = 0;
     const uint8_t *pay = (const uint8_t *)Tcl_GetBytesFromObj(interp, payload_obj, &pay_len);
-    if (!pay) return NULL;
+    if (!pay && pay_len != 0) return NULL;
     if (pay_len > 220) {
         Tcl_SetResult(interp, "mesh: payload exceeds 220-byte LoRa MTU limit", TCL_STATIC);
         return NULL;
@@ -273,7 +275,9 @@ critcl::cproc mesh::encode_packet {
     frame[3] = (uint8_t)(pb_len & 0xff);
     memcpy(frame + 4, pb_buf, pb_len);
 
-    return Tcl_NewByteArrayObj(frame, 4 + pb_len);
+    Tcl_Obj *result = Tcl_NewByteArrayObj(frame, 4 + pb_len);
+    Tcl_IncrRefCount(result);
+    return result;
 }
 
 # ---- Tcl layer: serial I/O, StreamAPI framing, public API ----
